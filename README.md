@@ -7,9 +7,10 @@ The task is to create software support for BeagleWire (based on iCE40 device). T
 <h2>About BeagleWire cape</h2>
 The BeagleWire is an FPGA development platform that has been designed for use with BeagleBone boards. BeagleWire is a cape on which there is FPGA device - Lattice iCE40HX. The Lattice iCE40 is a family of FPGAs with a minimalistic architecture and very regular structure, designed for low-cost, high-volume consumer and system applications. The significance of FPGAs is continuously increasing, as they are more and more often used for supporting work of ARM processors. BeagleWire does not require external tools (JTAG) and the whole software is Open Source. iCE40 is an energy saving device, allowing to work with small batteries. FPGA cape allows easy and low cost start for beginners who would like to take their first steps in working with FPGAs.
 
-<a href="https://hackaday.io/project/20989-beaglewire">Hackaday project page</a>
+<a href="https://hackaday.io/project/20989-beaglewire">Hackaday project page</a><br>
 <a href="https://github.com/mwelling/beagle-wire">BeagleWire KiCAD Repository</a>
 
 <h2>License</h2>
+BeagleWire software is covered by the LGPL 3.0 license.
 
 <h2>Images</h2>
