@@ -1,0 +1,28 @@
+/*
+ * Copyright (c) 2017 Patryk Mezydlo <pmezydlo - mezydlo.p@gmail.com>
+ *
+ */
+
+/dts-v1/;
+/plugin/;
+
+/* BeagleWire programmer */
+/ {
+	compatible = "ti,beaglebone", "ti,beaglebone-black";
+
+	fragment@0 {
+		target = <&spi0>;
+		__overlay__ {
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			ice40: ice40@0 {
+				compatible = "lattice,ice40-fpga-mgr";
+				reg = <0>;
+				spi-max-frequency = <10000000>;
+				cdone-gpios = <&gpio 24 0>;
+				reset-gpios = <&gpio 22 1>;
+			};
+		};
+	};
+};
