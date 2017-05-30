@@ -1,0 +1,41 @@
+/dts-v1/;
+/plugin/;
+
+/{
+	compatible = "ti,beaglebone", "ti,beaglebone-black";
+	part_number = "bw-bridge";
+	version = "00A0";
+
+	/* state the resources this cape uses */
+	exclusive-use =
+		/* the pin header uses */
+		"P9.31",	/* bw_irq_fpga_to_arm */
+		"P9.29",	/* bw_irg_arm_to_fpga */
+		"bw-bridge";
+
+
+	fragment@0 {
+		target = <&am33xx_pinmux>;
+		__overlay__ {
+			bw_bridge_pins: pinmux_bw_bridge_pins {
+				pinctrl-single,pins = <
+					0x044 0x27
+					0x1A4 0x07
+				>;
+			};
+		};
+	};
+
+	fragment@1 {
+		target = <&ocp>;
+		__overlay__ {
+			BW_bridge_pinmux: helper {
+				compatible = "bone-pinmux-helper";
+				status = "okay";
+				pinctrl-names = "default";
+				pinctrl-0 = <&bw_bridge_pins>;
+			};
+		};
+	};
+};
+
