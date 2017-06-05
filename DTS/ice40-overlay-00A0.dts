@@ -13,8 +13,8 @@
 		"P9.29",	/* bw_spi1_d0 */
 		"P9.30",	/* bw_spi1_d1 */
 		"P9.28",	/* bw_spi1_cs0 */
-		"P9_25",	/* bw_creset */
-		"P9_21",	/* bw_cdone */
+		"P9.25",	/* bw_creset */
+		"P9.21",	/* bw_cdone */
 		"spi1";
 
 	fragment@0 {
@@ -42,14 +42,12 @@
 			pinctrl-names = "default";
 			pinctrl-0 = <&bw_spi1_pins>;
 
-			fpga@0 {
-				#address-cells = <1>;
-				#size-cells = <0>;			
+			ice40: fpga@0 {			
 				compatible = "lattice,ice40-fpga-mgr";
 				reg = <1>;
 				spi-max-frequency = <10000000>;
-				cdone-gpios = <&gpio 3 1>;
-				reset-gpios = <&gpio 117 0>;
+				cdone-gpios = <&gpio1 3 0>;
+				reset-gpios = <&gpio4 21 1>;
 			};	
 		};
 	};
