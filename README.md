@@ -1,3 +1,5 @@
+<img src="https://travis-ci.org/pmezydlo/BeagleWire.svg?branch=master" alt="Travis Cl build" />
+
 <h1>BeagleWire</h1>
 This repository contains software for BeagleWire. It is a realization of my project for GSOC-2017.
 
