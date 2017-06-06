@@ -9,3 +9,6 @@ sudo connmanctl config <services> --nameservers 8.8.8.8
 sudo iptables -t nat -A POSTROUTING -o wlp5s0 -j MASQUERADE
 sudo iptables -A FORWARD -i enp4s0 -j ACCEPT
 sudo sysctl net.ipv4.ip_forward=1
+
+#program fpga device
+dd if=example.bin of=/dev/spidev1.0 
