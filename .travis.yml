@@ -1,5 +1,8 @@
 language: c
 
+os:
+  - linux
+
 addons:
   apt:
     sources:
@@ -7,11 +10,9 @@ addons:
     packages:
     - gcc-4.8
     - g++-4.8
-install:
-  - CC=gcc-4.8 CXX=g++-4.8 python
 
-os:
-  - linux
+install:
+  - CC=gcc-4.8 CXX=g++-4.8
 
 before_script:
   - export DST_PROJECT=$PWD
