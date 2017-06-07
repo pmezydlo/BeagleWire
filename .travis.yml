@@ -16,8 +16,8 @@ before_install:
 
 before_script:
   - export DST_PROJECT=$PWD
-  - sudo chmod +x $DTS_PROJECT/scripts/install_IceStorm.sh
-  - sudo sh $DTS_PROJECT/scripts/install_IceStorm.sh
+  - sudo chmod +x scripts/install_IceStorm.sh
+  - sudo sh scripts/install_IceStorm.sh
 
   - sudo wget -c https://raw.githubusercontent.com/RobertCNelson/tools/master/pkgs/dtc.sh
   - sudo chmod +x dtc.sh
