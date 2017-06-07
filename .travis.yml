@@ -5,31 +5,28 @@ os:
 
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install gcc 
-  - wget -c https://releases.linaro.org/components/toolchain/binaries/5.3-2016.02/arm-linux-gnueabihf/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf.tar.xz
-  - tar xf gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf.tar.xz
-  - export PATH=$PATH:$PWD/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf/bin/
-  - arm-linux-gnueabihf-gcc --version
-  - sudo apt-get install python3
-  - sudo apt-get install python
-  - sudo apt-get install bc
+  - sudo apt-get install g++
+  - sudo apt-get install gcc
 
 before_script:
   - export DST_PROJECT=$PWD
-  - sudo chmod +x scripts/install_IceStorm.sh
-  - sudo sh scripts/install_IceStorm.sh
+  - echo $DST_PROJECT
 
+script:
+  - sudo chmod +x $DST_PROJECT/scripts/install_IceStorm.sh
+  - sudo sh $DST_PROJECT/scripts/install_IceStorm.sh
+
+  - cd $DST_PROJECT/
   - sudo wget -c https://raw.githubusercontent.com/RobertCNelson/tools/master/pkgs/dtc.sh
   - sudo chmod +x dtc.sh
   - sudo ./dtc.sh
-
-script:
-  - cd ../BW_Bridge/
+    
+  - cd $DST_PROJECT/BW_Bridge/
   - make
 
-  - cd ../example/
+  - cd $DST_PROJECT/example/
   - make synth
 
-  - cd ../DTS
+  - cd $DST_PROJECT/DTS
   - sudo dtc -O dtb -o ice40-overlay-00A0.dtbo -b 0 -@ ice40-overlay-00A0.dts
   - sudo dtc -O dtb -o bw-bridge-overlay-00A0.dtbo -b 0 -@ bw-bridge-overlay-00A0.dts
