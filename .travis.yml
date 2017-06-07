@@ -1,15 +1,17 @@
 language: c
 
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - gcc-4.8
+    - g++-4.8
+install:
+  - CC=gcc-4.8 CXX=g++-4.8 python
+
 os:
   - linux
-
-before_install:
-  - sudo apt-get install gcc
-  - sudo apt-get install gcc-arm-linux-gnueabihf
-  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-  - sudo apt-get update
-  - sudo apt-get install g++-4.8
-  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50
 
 before_script:
   - export DST_PROJECT=$PWD
