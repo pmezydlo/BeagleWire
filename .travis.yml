@@ -6,13 +6,12 @@ os:
 addons:
   apt:
     sources:
-    - ubuntu-toolchain-r-test
+      - ubuntu-toolchain-r-test
     packages:
-    - gcc-4.8
-    - g++-4.8
+      - gcc-5
+      - g++-5
 
 install:
-  - CC=gcc-4.8 CXX=g++-4.8
   - sudo apt-get install gcc-arm-linux-gnueabihf 
 
 
