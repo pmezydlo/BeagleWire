@@ -13,6 +13,8 @@ addons:
 
 install:
   - CC=gcc-4.8 CXX=g++-4.8
+  - sudo apt-get install gcc-arm-linux-gnueabihf 
+
 
 before_script:
   - export DST_PROJECT=$PWD
