@@ -1,20 +1,15 @@
-language: c
+language: cpp
+compiler: gcc
+dist: trusty
 
-os:
-  - linux
+before_install:
+  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+  - sudo apt-get update -qq
 
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    packages:
-    - gcc-4.7
-    - g++-4.7
-    - libusb-1.0-0-dev
-
-install:
+install: 
+  - sudo apt-get install -qq g++-5
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 90
   - sudo apt-get install gcc-arm-linux-gnueabihf 
-
 
 before_script:
   - export DST_PROJECT=$PWD
