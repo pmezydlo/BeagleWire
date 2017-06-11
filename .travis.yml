@@ -6,10 +6,11 @@ os:
 addons:
   apt:
     sources:
-      - ubuntu-toolchain-r-test
+    - ubuntu-toolchain-r-test
     packages:
-      - gcc-4.3
-      - g++-4.3
+    - gcc-4.8
+    - g++-4.8
+    - libusb-1.0-0-dev
 
 install:
   - sudo apt-get install gcc-arm-linux-gnueabihf 
