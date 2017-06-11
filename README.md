@@ -1,4 +1,7 @@
-<img src="https://travis-ci.org/pmezydlo/BeagleWire.svg?branch=master" alt="Travis Cl build" />
+Branch|[![Travis CI logo](https://cdn.travis-ci.com/images/logos/TravisCI-Full-Color-45e242791b7752b745a7ae53f265acd4.png)](https://travis-ci.org)
+---|---
+master|[![Build Status](https://travis-ci.org/pmezydlo/BeagleWire.svg?branch=master)](https://travis-ci.org/pmezydlo/BeagleWire)
+develop|[![Build Status](https://travis-ci.org/pmezydlo/BeagleWire.svg?branch=develop)](https://travis-ci.org/pmezydlo/BeagleWire)
 
 <h1>BeagleWire</h1>
 This repository contains software for BeagleWire. It is a realization of my project for GSOC-2017.
