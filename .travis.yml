@@ -24,10 +24,13 @@ script:
   - sudo chmod +x dtc.sh
   - sudo ./dtc.sh
     
-  - cd $DST_PROJECT/BW_Bridge/
+  - cd $DST_PROJECT/BW_Bridge/arm_bridge_app
   - make
 
   - cd $DST_PROJECT/example/
+  - make synth
+
+  - cd $DST_PROJECT/BW_Bridge/fpga_bridge_mod/
   - make synth
 
   - cd $DST_PROJECT/DTS

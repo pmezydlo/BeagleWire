@@ -1,0 +1,44 @@
+#     Filename: gpmc.pcf
+#  Description: Physical constraints file (pcf) for BeagleWire (iCE40HX4K TQ144)
+#      License: GPLv2
+#
+#       Author: Copyright (C) Patryk Mezydlo
+#         Date: 2017-04-18
+
+# USER CLOCK
+set_io CLK_100M 61
+
+# LED
+set_io LED[0] 28
+set_io LED[1] 29
+set_io LED[2] 31
+set_io LED[3] 32
+
+#GPMC
+set_io GPMC_AD[0] 134
+set_io GPMC_AD[1] 136
+set_io GPMC_AD[2] 21
+set_io GPMC_AD[3] 22
+set_io GPMC_AD[4] 135
+set_io GPMC_AD[5] 138
+set_io GPMC_AD[6] 23
+set_io GPMC_AD[7] 24
+set_io GPMC_AD[8] 139
+set_io GPMC_AD[9] 2
+set_io GPMC_AD[10] 1
+set_io GPMC_AD[11] 141
+set_io GPMC_AD[12] 16
+set_io GPMC_AD[13] 3
+set_io GPMC_AD[14] 144
+set_io GPMC_AD[15] 143
+
+set_io GPMC_ADVN 19
+set_io GPMC_BE0N 17
+set_io GPMC_CSN1 137 
+set_io GPMC_CLK 142
+set_io GPMC_WEIN 18
+set_io GPMC_OEN 20
+
+# BUTTON
+set_io BTN[0] 25
+set_io BTN[1] 26
