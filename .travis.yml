@@ -31,7 +31,7 @@ script:
   - make synth
 
   - cd $DST_PROJECT/BW_Bridge/fpga_bridge_mod/
-  - make synth
+  - make
 
   - cd $DST_PROJECT/DTS
   - sudo dtc -O dtb -o ice40-overlay-00A0.dtbo -b 0 -@ ice40-overlay-00A0.dts
