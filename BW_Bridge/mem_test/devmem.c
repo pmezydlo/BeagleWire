@@ -39,15 +39,7 @@ int main(int argc, char const *argv[])
 
 	//j = *(unsigned char *)(virt_addr);
 	
-	*(uint16_t *)(virt_addr) = 1;
-	
-	*(uint16_t *)(virt_addr) = 2;
-	//usleep(1000);
-
-	*(uint16_t *)(virt_addr) = 3;
-	//usleep(1000);
-
-	*(uint16_t *)(virt_addr) = 0;
+	*(uint16_t *)(virt_addr + 4) = 1;
 
 	if (munmap(mem_pointer, alloc_mem_size) == -1)
 		perror("Error un-mmapping the file");
