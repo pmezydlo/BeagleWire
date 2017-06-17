@@ -42,7 +42,6 @@ reg data_in;
 initial begin
     addr <= 3'b0;
     data_out <= 16'b0;
-    data_in <= 16'b0;
 end
 
 SB_IO # (
