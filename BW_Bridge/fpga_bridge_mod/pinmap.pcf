@@ -1,80 +1,80 @@
-#     Filename: gpmc.pcf
-#  Description: Physical constraints file (pcf) for BeagleWire (iCE40HX4K TQ144)
-#      License: GPLv2
+#     filename: gpmc.pcf
+#  description: physical constraints file (pcf) for beaglewire (ice40hx4k tq144)
+#      license: gplv2
 #
-#       Author: Copyright (C) Patryk Mezydlo
-#         Date: 2017-04-18
+#       author: copyright (c) Patryk Mezydlo
+#         date: 2017-04-18
 
 # USER CLOCK
-set_io CLK_100M 61
+set_io clk 61
 
 # LED
-set_io LED[0] 28
-set_io LED[1] 29
-set_io LED[2] 31
-set_io LED[3] 32
+set_io led[0] 28
+set_io led[1] 29
+set_io led[2] 31
+set_io led[3] 32
 
 #GPMC
-set_io GPMC_AD[0] 134
-set_io GPMC_AD[1] 136
-set_io GPMC_AD[2] 21
-set_io GPMC_AD[3] 22
-set_io GPMC_AD[4] 135
-set_io GPMC_AD[5] 138
-set_io GPMC_AD[6] 23
-set_io GPMC_AD[7] 24
-set_io GPMC_AD[8] 139
-set_io GPMC_AD[9] 2
-set_io GPMC_AD[10] 1
-set_io GPMC_AD[11] 141
-set_io GPMC_AD[12] 16
-set_io GPMC_AD[13] 3
-set_io GPMC_AD[14] 144
-set_io GPMC_AD[15] 143
+set_io gpmc_ad0 134
+set_io gpmc_ad1 136
+set_io gpmc_ad2 21
+set_io gpmc_ad3 22
+set_io gpmc_ad4 135
+set_io gpmc_ad5 138
+set_io gpmc_ad6 23
+set_io gpmc_ad7 24
+set_io gpmc_ad8 139
+set_io gpmc_ad9 2
+set_io gpmc_ad10 1
+set_io gpmc_ad11 141
+set_io gpmc_ad12 16
+set_io gpmc_ad13 3
+set_io gpmc_ad14 144
+set_io gpmc_ad15 143
 
-set_io GPMC_ADVN 19
-set_io GPMC_CSN1 137 
-set_io GPMC_CLK 142
-set_io GPMC_WEIN 18
-set_io GPMC_OEN 20
+set_io gpmc_advn 19
+set_io gpmc_csn1 137 
+set_io gpmc_clk 142
+set_io gpmc_wein 18
+set_io gpmc_oen 20
 
 # BUTTON
-set_io BTN[0] 25
-set_io BTN[1] 26
+set_io btn[0] 25
+set_io btn[1] 26
 
 # PMOD
-set_io PMOD1[0] 38
-set_io PMOD1[1] 37
-set_io PMOD1[2] 41
-set_io PMOD1[3] 39
-set_io PMOD1[4] 43
-set_io PMOD1[5] 42
-set_io PMOD1[6] 45
-set_io PMOD1[7] 44
+set_io pmod1[0] 38
+set_io pmod1[1] 37
+set_io pmod1[2] 41
+set_io pmod1[3] 39
+set_io pmod1[4] 43
+set_io pmod1[5] 42
+set_io pmod1[6] 45
+set_io pmod1[7] 44
 
-set_io PMOD2[0] 48
-set_io PMOD2[1] 47
-set_io PMOD2[2] 52
-set_io PMOD2[3] 49
-set_io PMOD2[4] 56
-set_io PMOD2[5] 55
-set_io PMOD2[6] 62
-set_io PMOD2[7] 60
+set_io pmod2[0] 48
+set_io pmod2[1] 47
+set_io pmod2[2] 52
+set_io pmod2[3] 49
+set_io pmod2[4] 56
+set_io pmod2[5] 55
+set_io pmod2[6] 62
+set_io pmod2[7] 60
 
-set_io PMOD3[0] 117 
-set_io PMOD3[1] 110
-set_io PMOD3[2] 112
-set_io PMOD3[3] 113
-set_io PMOD3[4] 116
-set_io PMOD3[5] 115
-set_io PMOD3[6] 129
-set_io PMOD3[7] 130
+set_io pmod3[0] 117 
+set_io pmod3[1] 110
+set_io pmod3[2] 112
+set_io pmod3[3] 113
+set_io pmod3[4] 116
+set_io pmod3[5] 115
+set_io pmod3[6] 129
+set_io pmod3[7] 130
 
-set_io PMOD4[0] 4
-set_io PMOD4[1] 7
-set_io PMOD4[2] 8
-set_io PMOD4[3] 9
-set_io PMOD4[4] 10
-set_io PMOD4[5] 15
-set_io PMOD4[6] 11
-set_io PMOD4[7] 12
+set_io pmod4[0] 4
+set_io pmod4[1] 7
+set_io pmod4[2] 8
+set_io pmod4[3] 9
+set_io pmod4[4] 10
+set_io pmod4[5] 15
+set_io pmod4[6] 11
+set_io pmod4[7] 12
