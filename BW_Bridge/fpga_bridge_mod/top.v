@@ -1,44 +1,49 @@
 module top (input         CLK_100M, 
             output [3:0]  LED,
-            input  [15:0] GPMC_AD,
+            inout  [15:0] GPMC_AD,
             input         GPMC_ADVN,
             input         GPMC_CSN1,
             input         GPMC_WEIN,
             input         GPMC_OEN,
             input         GPMC_CLK,
             input  [1:0]  BTN,
-            output [7:0]  PMOD1);
+            output [7:0]  PMOD1,
+            output [7:0]  PMOD2,
+            output [7:0]  PMOD3,
+            output [7:0]  PMOD4);
 
+parameter ADDR_WIDTH = 4;
+parameter DATA_WIDTH = 16;
 
-localparam MAX_ADDR_WIDTH = 3;
+reg [ADDR_WIDTH:0] addr;
+reg [DATA_WIDTH-1:0] mem [ADDR_WIDTH-1:0];
+reg [DATA_WIDTH-1:0] data_out;
 
-
-reg [15:0] address;
-reg [MAX_ADDR_WIDTH:0] mem [15:0];
-reg [MAX_ADDR_WIDTH:0] offset;
-wire reset;
-
-assign reset = BTN[1];
-
-always @ (negedge GPMC_CLK or negedge reset) begin
-    if (reset == 1'b0) begin
-        //mem <= 0;
-        address <= 0;
-        offset <= 0;
-    end else begin
-        if (GPMC_CSN1 == 1'b0) begin
-            if (GPMC_ADVN == 1'b0)
-                address <= GPMC_AD;
-            if (GPMC_WEIN == 1'b0) begin
-                mem[address[MAX_ADDR_WIDTH:0] + offset] <= GPMC_AD;
-                offset <= offset + 1;
-            end
-            if (GPMC_OEN == 1'b0) begin
-                GPMC_AD <= mem[address[MAX_ADDR_WIDTH:0] + offset];
-                offset <= offset + 1;
-            end
-        end
-    end
+initial begin
+    addr <= 3'b000;
+    data_out <= 16'b0000_0000_0000_0000;
 end
-        
+
+assign GPMC_AD = (!GPMC_CSN1 && GPMC_ADVN && !GPMC_OEN && GPMC_WEIN) ? data_out : 16'bz;
+
+always @ (negedge CLK_100M)
+begin : GPMC_LATCH_ADDRESS   
+    if (!GPMC_CSN1 && !GPMC_ADVN && GPMC_WEIN && GPMC_OEN)
+        addr <= GPMC_AD[ADDR_WIDTH-1:0];
+end
+
+always @ (negedge CLK_100M)
+begin : GPMC_WRITE_DATA   
+    if (!GPMC_CSN1 && GPMC_ADVN && !GPMC_WEIN && GPMC_OEN)
+        mem[addr] <= GPMC_AD[DATA_WIDTH-1:0];
+end
+
+always @ (negedge GPMC_CLK)
+begin : GPMC_READ_DATA   
+    if (!GPMC_CSN1 && GPMC_ADVN && !GPMC_WEIN && GPMC_OEN)
+        data_out <= mem[addr];
+end
+
+assign LED = mem[0][3:0];
+
 endmodule

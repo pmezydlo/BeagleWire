@@ -52,3 +52,29 @@ set_io PMOD1[5] 42
 set_io PMOD1[6] 45
 set_io PMOD1[7] 44
 
+set_io PMOD2[0] 48
+set_io PMOD2[1] 47
+set_io PMOD2[2] 52
+set_io PMOD2[3] 49
+set_io PMOD2[4] 56
+set_io PMOD2[5] 55
+set_io PMOD2[6] 62
+set_io PMOD2[7] 60
+
+set_io PMOD3[0] 117 
+set_io PMOD3[1] 110
+set_io PMOD3[2] 112
+set_io PMOD3[3] 113
+set_io PMOD3[4] 116
+set_io PMOD3[5] 115
+set_io PMOD3[6] 129
+set_io PMOD3[7] 130
+
+set_io PMOD4[0] 4
+set_io PMOD4[1] 7
+set_io PMOD4[2] 8
+set_io PMOD4[3] 9
+set_io PMOD4[4] 10
+set_io PMOD4[5] 15
+set_io PMOD4[6] 11
+set_io PMOD4[7] 12

@@ -146,34 +146,31 @@
 				gpmc,mux-add-data = <2>;		/* GPMC_CONFIG1_MUXTYPE(2) */
 
 				/* CONFIG2 */
-				gpmc,sync-clk-ps = <40000>;
+				gpmc,sync-clk-ps = <20000>;
 				gpmc,cs-on-ns = <0>;
-				gpmc,cs-rd-off-ns = <200>;
-				gpmc,cs-wr-off-ns = <200>;
+				gpmc,cs-rd-off-ns = <100>;
+				gpmc,cs-wr-off-ns = <40>;
 
 				/* CONFIG3 */
 				gpmc,adv-on-ns = <0>;
-				gpmc,adv-rd-off-ns = <80>;
-				gpmc,adv-wr-off-ns = <80>;
+				gpmc,adv-rd-off-ns = <20>;
+				gpmc,adv-wr-off-ns = <20>;
 
 				/* CONFIG4 */
-				gpmc,we-on-ns = <40>;
-				gpmc,we-off-ns = <200>;
-				gpmc,oe-on-ns = <40>;
-				gpmc,oe-off-ns = <200>;
+				gpmc,we-on-ns = <20>;
+				gpmc,we-off-ns = <40>;
+				gpmc,oe-on-ns = <20>;
+				gpmc,oe-off-ns = <100>;
 
 				/* CONFIG 5 */
-				gpmc,page-burst-access-ns = <40>;
-				gpmc,access-ns = <160>;
-				gpmc,rd-cycle-ns = <240>;
-				gpmc,wr-cycle-ns = <240>;
+				gpmc,page-burst-access-ns = <20>;
+				gpmc,access-ns = <80>;
+				gpmc,rd-cycle-ns = <120>;
+				gpmc,wr-cycle-ns = <60>;
 
 				/* CONFIG 6 */
-				gpmc,wr-access-ns = <80>;
-				gpmc,wr-data-mux-bus-ns = <40>;
-				/*gpmc,bus-turnaround-ns = <40>;*/	/* CONFIG6:3:0 = 4 */
-				/*gpmc,cycle2cycle-samecsen;*/		/* CONFIG6:7 = 1 */
-				/*gpmc,cycle2cycle-delay-ns = <40>;*/	/* CONFIG6:11:8 = 4 */
+				gpmc,wr-access-ns = <40>;
+				gpmc,wr-data-mux-bus-ns = <20>;
 
 			};
 
