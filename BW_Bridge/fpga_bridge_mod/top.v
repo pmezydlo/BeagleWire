@@ -57,13 +57,13 @@ SB_IO # (
 always @ (negedge gpmc_clk)
 begin : GPMC_LATCH_ADDRESS   
     if (!gpmc_csn1 && !gpmc_advn && gpmc_wein && gpmc_oen)
-        addr <= gpmc_ad[ADDR_WIDTH-1:0];
+        addr <= data_in[ADDR_WIDTH-1:0];
 end
 
 always @ (negedge gpmc_clk)
 begin : GPMC_WRITE_DATA   
     if (!gpmc_csn1 && gpmc_advn && !gpmc_wein && gpmc_oen)
-        mem[addr] <= data_in;
+        mem[addr] <= data_in[DATA_WIDTH-1:0];
 end
 
 always @ (negedge gpmc_clk)
