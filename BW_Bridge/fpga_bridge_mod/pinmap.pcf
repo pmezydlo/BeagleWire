@@ -15,22 +15,22 @@ set_io led[2] 31
 set_io led[3] 32
 
 #GPMC
-set_io gpmc_ad0 134
-set_io gpmc_ad1 136
-set_io gpmc_ad2 21
-set_io gpmc_ad3 22
-set_io gpmc_ad4 135
-set_io gpmc_ad5 138
-set_io gpmc_ad6 23
-set_io gpmc_ad7 24
-set_io gpmc_ad8 139
-set_io gpmc_ad9 2
-set_io gpmc_ad10 1
-set_io gpmc_ad11 141
-set_io gpmc_ad12 16
-set_io gpmc_ad13 3
-set_io gpmc_ad14 144
-set_io gpmc_ad15 143
+set_io gpmc_ad[0] 134
+set_io gpmc_ad[1] 136
+set_io gpmc_ad[2] 21
+set_io gpmc_ad[3] 22
+set_io gpmc_ad[4] 135
+set_io gpmc_ad[5] 138
+set_io gpmc_ad[6] 23
+set_io gpmc_ad[7] 24
+set_io gpmc_ad[8] 139
+set_io gpmc_ad[9] 2
+set_io gpmc_ad[10] 1
+set_io gpmc_ad[11] 141
+set_io gpmc_ad[12] 16
+set_io gpmc_ad[13] 3
+set_io gpmc_ad[14] 144
+set_io gpmc_ad[15] 143
 
 set_io gpmc_advn 19
 set_io gpmc_csn1 137 

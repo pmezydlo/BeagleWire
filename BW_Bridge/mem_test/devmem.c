@@ -36,13 +36,19 @@ int main(int argc, char const *argv[])
 
         int i;
 	uint16_t j;
-        for (i = 0; i <= 7; i++) {
+        for (i = 0; i <= 15; i++) {
                 printf("addr offset %d write:%d", i*2, i);
                 *(uint16_t *)(virt_addr + i*2) = i;
 
                 j = *(uint16_t *)(virt_addr + i*2);
                 printf("  read:%d\n", j);
         }
+
+	for (i = 0; i<=4 i++) {
+		printf("leds write %d\n", 1 << i);
+		*(uint16_t)(virt_addr) = 1 << i;
+		usleep(500000);
+	}
 
 	if (munmap(mem_pointer, alloc_mem_size) == -1)
 		perror("Error un-mmapping the file");

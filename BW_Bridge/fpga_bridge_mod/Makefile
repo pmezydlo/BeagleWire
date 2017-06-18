@@ -14,10 +14,10 @@ all:
 	yosys -p "synth_ice40 -top top -blif $(BUILD)/$(PROJ).blif" $(SRC)
 	arachne-pnr -d $(DEVICE) -P $(FOOTPRNT) -p $(PIN_SRC) -o $(BUILD)/$(PROJ).asc $(BUILD)/$(PROJ).blif
 	icepack $(BUILD)/$(PROJ).asc $(BUILD)/$(PROJ).bin
-
+	echo -e "\x0\x0\x0\x0\x0\x0\x0" >> $(BUILD)/$(PROJ).bin
+	
 load:
 	dd if= $(BUILD)/$(PROJ).bin of=/dev/spidev1.0
 
-
 clean:
-	rm -r ./$(BUILD)/
+	rm -rf ./$(BUILD)/
