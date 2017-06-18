@@ -26,32 +26,33 @@ int main(int argc, char const *argv[])
                    MAP_SHARED,
                    mem_dev,
                    (mem_address & ~page_mask)
-                   ); 
-	if(mem_pointer == MAP_FAILED)
-	{  
+                   );
+
+	if(mem_pointer == MAP_FAILED) {
 	      perror("Error mmap");
 	}
 
 	virt_addr = (mem_pointer + (mem_address & page_mask));
 
-	 int i;
-	 unsigned char j;
+        int i;
+	uint16_t j;
+        for (i = 0; i <= 15; i++) {
+                printf("addr offset %d write:%d", i*2, i);
+                *(uint16_t *)(virt_addr + i*2) = i;
 
-	//j = *(unsigned char *)(virt_addr);
-	
-	*(uint16_t *)(virt_addr) = 1;
-	
-	*(uint16_t *)(virt_addr) = 2;
-	//usleep(1000);
+                j = *(uint16_t *)(virt_addr + i*2);
+                printf("  read:%d\n", j);
+        }
 
-	*(uint16_t *)(virt_addr) = 3;
-	//usleep(1000);
-
-	*(uint16_t *)(virt_addr) = 0;
+	for (i = 0; i<=4 i++) {
+		printf("leds write %d\n", 1 << i);
+		*(uint16_t)(virt_addr) = 1 << i;
+		usleep(500000);
+	}
 
 	if (munmap(mem_pointer, alloc_mem_size) == -1)
 		perror("Error un-mmapping the file");
-	
+
 	close(mem_dev);
 
 	return 0;
