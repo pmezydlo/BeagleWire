@@ -1,0 +1,15 @@
+#     filename: pinmap.pcf
+#  description: physical constraints file (pcf) for beaglewire (ice40hx4k tq144)
+#      license: gplv3
+#
+#       author: copyright (c) Patryk Mezydlo
+#         date: 2017-04-18
+
+# USER CLOCK
+set_io clk 61
+
+# LED
+set_io led[0] 28
+set_io led[1] 29
+set_io led[2] 31
+set_io led[3] 32

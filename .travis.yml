@@ -23,16 +23,18 @@ script:
   - sudo wget -c https://raw.githubusercontent.com/RobertCNelson/tools/master/pkgs/dtc.sh
   - sudo chmod +x dtc.sh
   - sudo ./dtc.sh
-    
-  - cd $DST_PROJECT/BW_Bridge/arm_bridge_app
+   
+  - cd $DST_PROJECT/examples/arm_blink_leds/fpga/
+  - make
+  - cd $DST_PROJECT/examples/arm_blink_leds/arm/
   - make
 
-  - cd $DST_PROJECT/example/
-  - make synth
+  - cd $DST_PROJECT/examples/blink_leds/
+  - make
 
-  - cd $DST_PROJECT/BW_Bridge/fpga_bridge_mod/
+  - cd $DST_PROJECT/bridge_lib/
   - make
 
   - cd $DST_PROJECT/DTS
-  - sudo dtc -O dtb -o ice40-overlay-00A0.dtbo -b 0 -@ ice40-overlay-00A0.dts
-  - sudo dtc -O dtb -o bw-bridge-overlay-00A0.dtbo -b 0 -@ bw-bridge-overlay-00A0.dts
+  - sudo dtc -O dtb -o BW-ICE40Cape-00A0.dtbo -b 0 -@ BW-ICE40Cape-00A0.dts
+

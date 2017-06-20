@@ -4,7 +4,7 @@ DEVICE = 8k
 FOOTPRNT = tq144:4k
 
 SRC = top.v
-SRC +=
+SRC += ../../../components/gpmc-sync.v
 PIN_SRC = pinmap.pcf
 
 .PHONY: all load clean

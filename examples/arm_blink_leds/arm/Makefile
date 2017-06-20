@@ -4,7 +4,7 @@ CC = $(CROSS_CC)gcc
 PWD = $(shell pwd)
 CFLAGS = -Wall -g
 
-SRCS = main.c BW_bridge.c
+SRCS = blink.c ../../../bridge_lib/bw_bridge.c
 OBJS = $(SRCS: .c=.o)
 MAIN = main
 
