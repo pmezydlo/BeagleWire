@@ -139,8 +139,8 @@
 				/*gpmc,burst-write;
 				gpmc,burst-read;
 				gpmc,burst-wrap;*/
-				gpmc,async-read;				/* GPMC_CONFIG1_READTYPE_ASYNC */
-				gpmc,async-write;			/* GPMC_CONFIG1_WRITETYPE_ASYNC */
+				gpmc,sync-read;				/* GPMC_CONFIG1_READTYPE_ASYNC */
+				gpmc,sync-write;			/* GPMC_CONFIG1_WRITETYPE_ASYNC */
 				gpmc,clk-activation-ns = <0>;		/* GPMC_CONFIG1_CLKACTIVATIONTIME(2) */
 				gpmc,burst-length = <16>;		/* GPMC_CONFIG1_PAGE_LEN(2) */
 				gpmc,mux-add-data = <2>;		/* GPMC_CONFIG1_MUXTYPE(2) */

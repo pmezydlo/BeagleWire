@@ -1,44 +1,49 @@
 module gpmc_sync (input                    clk,
+                  // GPMC INTERFACE
                   inout  [15:0]            gpmc_ad,
                   input                    gpmc_advn,
                   input                    gpmc_csn1,
                   input                    gpmc_wein,
                   input                    gpmc_oen,
                   input                    gpmc_clk,
-                  inout                    data,
-                  output                   busy,
-                  input                    cs,
-                  input                    oe,
-                  input                    we,
-                  input  [ADDR_WIDTH-1:0]  addr);
-         
+
+                  // HOST INTERFACE
+                  output                   oe,
+                  output                   we,
+                  output                   cs,
+                  output [ADDR_WIDTH-1:0]  address,
+                  output [DATA_WIDTH-1:0]  data_out,
+                  input  [DATA_WIDTH-1:0]  data_in);
+
 parameter ADDR_WIDTH = 4;
 parameter DATA_WIDTH = 16;
-parameter RAM_DEPTH = 1 << ADDR_WIDTH; 
 
 reg [ADDR_WIDTH-1:0] gpmc_addr;
-reg [DATA_WIDTH-1:0] mem [0:RAM_DEPTH];
 reg [DATA_WIDTH-1:0] gpmc_data_out;
 wire [DATA_WIDTH-1:0] gpmc_data_in;
-wire busy;
+reg csn_bridge;
+reg wen_bridge;
+reg oen_bridge;
+reg [DATA_WIDTH-1:0] write_bridge;
 
-assign busy = !gpmc_csn1;
+reg csn_sync;
+reg wen_sync;
+reg oen_sync;
+reg [ADDR_WIDTH-1:0] addr_sync;
+reg [DATA_WIDTH-1:0] write_sync;
 
-reg cs;
-reg oe;
-reg we;
+reg csn;
+reg wen;
+reg oen;
 reg [ADDR_WIDTH-1:0] addr;
-wire [DATA_WIDTH-1:0] data_out;
-assign data = (!cs && !oe && we) ? data_out : 16'bz;
+reg [DATA_WIDTH-1:0] write;
 
 initial begin
-    cs <= 1'b1;
-    oe <= 1'b1;
-    we <= 1'b1;
-    addr <= 0;
-    data_out <= 0;
     gpmc_addr <= 3'b0;
     gpmc_data_out <= 16'b0;
+    csn_bridge <= 1'b1;
+    wen_bridge <= 1'b1;
+    oen_bridge <= 1'b1;
 end
 
 SB_IO # (
@@ -58,25 +63,37 @@ begin : GPMC_LATCH_ADDRESS
 end
 
 always @ (negedge gpmc_clk)
-begin : WRITE_DATA   
-    if (!gpmc_csn1) begin
-        if (gpmc_advn && !gpmc_wein && gpmc_oen)
-            mem[gpmc_addr] <= gpmc_data_in;
-    end else begin
-        if (!cs && !we && oe)
-            mem[addr] <= data;
-    end
+begin : GEN_RAM_STROBE_SIGNAL
+    csn_bridge <= gpmc_csn1;
+    wen_bridge <= gpmc_wein;
+    oen_bridge <= gpmc_oen;
+    write_bridge <= gpmc_data_in;
 end
 
-always @ (negedge gpmc_clk)
-begin : READ_DATA   
-    if (!gpmc_csn1) begin 
-        if (gpmc_advn && gpmc_wein && !gpmc_oen)
-            gpmc_data_out <= mem[gpmc_addr];
-    end else begin
-        if (!cs && we && !oe)
-            data_out <= mem[addr];
-    end
+always @ (posedge clk)
+begin
+// Dual flop synchronizer stage 1
+    csn_sync <= csn_bridge;
+    wen_sync <= wen_bridge;
+    oen_sync <= oen_bridge;
+    addr_sync <= gpmc_addr;
+    write_sync <= write_bridge;
+
+// Dual flop synchronizer stage 2
+    csn <= csn_sync;
+    wen <= wen_sync;
+    oen <= oen_sync;
+    addr <= addr_sync;
+    write <= write_sync;
+
+    gpmc_data_out <= data_in;
+
 end
+
+assign cs = csn;
+assign we = !(!csn && !wen && oen); // wen
+assign oe = !(!csn && wen && !oen); // oen
+assign address = addr;
+assign data_out = write;
 
 endmodule

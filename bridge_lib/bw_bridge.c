@@ -14,12 +14,11 @@ int bw_init() {
 		return -EPERM;
 
 	mem_pointer = mmap(NULL,
-                   alloc_mem_size,
-                   PROT_READ | PROT_WRITE,
-                   MAP_SHARED,
-                   mem_dev,
-                   (mem_address & ~page_mask)
-                   );
+		           alloc_mem_size,
+			   PROT_READ | PROT_WRITE,
+                           MAP_SHARED,
+                           mem_dev,
+                           (mem_address & ~page_mask));
 
 	if(mem_pointer == MAP_FAILED) {
 	      return -ENOMEM;
