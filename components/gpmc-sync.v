@@ -46,6 +46,7 @@ initial begin
     oen_bridge <= 1'b1;
 end
 
+//Tri-State buffer controll
 SB_IO # (
     .PIN_TYPE(6'b1010_01),
     .PULLUP(1'b 0)
