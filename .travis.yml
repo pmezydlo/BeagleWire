@@ -24,9 +24,7 @@ script:
   - sudo chmod +x dtc.sh
   - sudo ./dtc.sh
    
-  - cd $DST_PROJECT/examples/arm_blink_leds/fpga/
-  - make
-  - cd $DST_PROJECT/examples/arm_blink_leds/arm/
+  - cd $DST_PROJECT/examples/arm_blink_leds/
   - make
 
   - cd $DST_PROJECT/examples/blink_leds/
