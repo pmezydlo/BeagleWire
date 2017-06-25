@@ -93,7 +93,7 @@
 			status = "okay";
 			pinctrl-names = "default";
 			pinctrl-0 = <&bw_spi1_pins>;
-
+			/*
 			ice40: fpga@0 {			
 				compatible = "lattice,ice40-fpga-mgr";
 				reg = <1>;
@@ -102,25 +102,25 @@
 				reset-gpios = <&gpio3 21 1>;
 			};
 
-			base_fpga_region {
+			fpga_region0: base_fpga_region {
 				compatible = "fpga-region";
 				fpga-mgr = <&ice40>;
 				#address-cells = <0x1>;
 				#size-cells = <0x1>;
 				ranges;
 			};
+			*/
 			
-			/*
 			channel@0 {
 				#address-cells = <1>;
 				#size-cells = <0>;
 				compatible = "spidev";
 				reg = <0>;
 				spi-max-frequency = <10000000>;
-			};*/
+			};
 		};
 	};
-
+	/*
 	fragment@2 {
 		target = <&base_fpga_region>;
 		#address-cells = <1>;
@@ -130,9 +130,9 @@
 			#size-cells = <1>;
 			firmware-name = "ice40-firmware.bin";
 		};
-	};
+	};*/
 
-	fragment@3 {
+	fragment@2 {
 		target = <&gpmc>;
 		depth = <1>;	/* only create devices on depth 1 */
 
