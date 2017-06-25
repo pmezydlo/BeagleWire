@@ -1,0 +1,19 @@
+#     filename: gpmc.pcf
+#  description: physical constraints file (pcf) for beaglewire (ice40hx4k tq144)
+#      license: gplv2
+#
+#       author: copyright (c) Patryk Mezydlo
+#         date: 2017-04-18
+
+# USER CLOCK
+set_io clk 61
+
+# PMOD
+set_io pmod1[0] 38
+set_io pmod1[1] 37
+set_io pmod1[2] 41
+set_io pmod1[3] 39
+set_io pmod1[4] 43
+set_io pmod1[5] 42
+set_io pmod1[6] 45
+set_io pmod1[7] 44
