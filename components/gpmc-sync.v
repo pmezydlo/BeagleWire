@@ -15,7 +15,7 @@ module gpmc_sync (input                    clk,
                   output [DATA_WIDTH-1:0]  data_out,
                   input  [DATA_WIDTH-1:0]  data_in);
 
-parameter ADDR_WIDTH = 4;
+parameter ADDR_WIDTH = 16;
 parameter DATA_WIDTH = 16;
 
 reg [ADDR_WIDTH-1:0] gpmc_addr;
@@ -60,7 +60,7 @@ SB_IO # (
 always @ (negedge gpmc_clk)
 begin : GPMC_LATCH_ADDRESS   
     if (!gpmc_csn1 && !gpmc_advn && gpmc_wein && gpmc_oen)
-        gpmc_addr <= gpmc_data_in[ADDR_WIDTH-1:0];
+        gpmc_addr <= gpmc_data_in;
 end
 
 always @ (negedge gpmc_clk)

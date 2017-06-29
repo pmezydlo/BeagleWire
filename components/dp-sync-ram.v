@@ -16,7 +16,7 @@ module dp_sync_ram(input                    clk,
 
 parameter ADDR_WIDTH = 4;
 parameter DATA_WIDTH = 16;
-parameter RAM_DEPTH = 1 << ADDR_WIDTH; 
+parameter RAM_DEPTH = 1 << ADDR_WIDTH;
 
 reg [DATA_WIDTH-1:0] mem [0:RAM_DEPTH];
 reg [DATA_WIDTH-1:0] data_out_0;

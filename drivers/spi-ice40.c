@@ -10,7 +10,7 @@
 
 #include <linux/kernel.h>
 #include <linux/module.h>
-#include <asm/io.h>
+#include <linux/io.h>
 #include <linux/of.h>
 #include <linux/ioport.h>
 #include <linux/slab.h>
@@ -19,6 +19,40 @@
 #include <linux/err.h>
 
 #define DRIVER_NAME "ice40-spi"
+
+struct ice40_spi {
+	struct spi_master *master;
+	void __iomem      *base;
+
+};
+
+
+inline unsigned int ice40_spi_read_reg(void __iomem *base, u32 idx)
+{
+	return ioread16(base + idx);
+}
+
+inline void ice40_spi_write_reg(void __iomem *base,
+		u32 idx, u16 val)
+{
+	iowrite16(val, base + idx);
+}
+
+int ice40_spi_wait_for_bit(void __iomem *reg, u16 bit)
+{
+	unsigned long timeout;
+
+	timeout = jiffies + msecs_to_jiffies(1000);
+	while (!(ioread16(reg) & bit)) {
+		if (time_after(jiffies, timeout))
+			return -ETIMEDOUT;
+		else
+			return 0;
+
+		cpu_relax();
+	}
+	return 0;
+}
 
 static int ice40_spi_transfer_one(struct spi_master *master,
 				  struct spi_device *spi,
@@ -36,8 +70,42 @@ static int ice40_spi_setup(struct spi_device *spi)
 
 static int ice40_spi_probe(struct platform_device *pdev)
 {
+	struct spi_master *master;
+	struct ice40_spi  *ice40_spi;
+	struct resource *res;
+	int err;
+
+	pr_info("ice40 spi probe");
+
+	master = spi_alloc_master(&pdev->dev, sizeof(struct ice40_spi));
+
+	if (!master)
+		return -ENODEV;
+
+	master->bus_num = pdev->id;
+	master->num_chipselect = 1;
+	master->mode_bits = SPI_CS_HIGH | SPI_CPOL | SPI_CPHA;
+	//master->max_speed_hz =
+	master->setup = ice40_spi_setup;
+	master->transfer_one = ice40_spi_transfer_one;
+	master->dev.of_node = pdev->dev.of_node;
+
+	platform_set_drvdata(pdev, master);
+	ice40_spi = spi_master_get_devdata(master);
+
+	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+	ice40_spi->base = devm_ioremap_resource(&pdev->dev, res);
+
+	if (IS_ERR(ice40_spi->base)) {
+		err = PTR_ERR(ice40_spi->base);
+		goto exit;
+	}
+
 
 	return 0;
+exit:
+	spi_master_put(master);
+	return err;
 }
 
 static int ice40_spi_remove(struct platform_device *pdev)
