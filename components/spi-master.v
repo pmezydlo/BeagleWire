@@ -1,4 +1,4 @@
-module spi #(parameter CLK_DIV = 2)(
+module spi(
     input clk,
     input rst,
     input miso,
@@ -10,7 +10,7 @@ module spi #(parameter CLK_DIV = 2)(
     output busy,
     output new_data
   );
-   
+  parameter CLK_DIV = 2; 
   localparam STATE_SIZE = 2;
   localparam IDLE = 2'd0,
     WAIT_HALF = 2'd1,

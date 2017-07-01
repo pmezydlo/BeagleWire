@@ -14,7 +14,6 @@ module top (input         clk,
 
 parameter ADDR_WIDTH = 4;
 parameter DATA_WIDTH = 16;
-parameter MEM_SIZE = 128;
 
 wire oe;
 wire we;
@@ -46,11 +45,9 @@ gpmc_controller (
 
 dp_sync_ram #(
     .DATA_WIDTH(DATA_WIDTH),
-    .ADDR_WIDTH(ADDR_WIDTH),
-    .MEM_SIZE(MEM_SIZE))
+    .ADDR_WIDTH(ADDR_WIDTH))
 dual_port_ram (
     .clk(clk),
-
     .cs_0(cs),
     .we_0(we),
     .oe_0(oe),

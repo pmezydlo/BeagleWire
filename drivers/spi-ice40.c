@@ -17,6 +17,7 @@
 #include <linux/spi/spi.h>
 #include <linux/platform_device.h>
 #include <linux/err.h>
+#include <linux/delay.h>
 
 #define DRIVER_NAME "ice40-spi"
 
@@ -74,6 +75,7 @@ static int ice40_spi_probe(struct platform_device *pdev)
 	struct ice40_spi  *ice40_spi;
 	struct resource *res;
 	int err;
+	int i = 0;
 
 	pr_info("ice40 spi probe");
 
@@ -99,6 +101,12 @@ static int ice40_spi_probe(struct platform_device *pdev)
 	if (IS_ERR(ice40_spi->base)) {
 		err = PTR_ERR(ice40_spi->base);
 		goto exit;
+	}
+
+	for (i = 0; i <= 4; i++) {
+		pr_info("leds write: %d", 1 << i);
+		*(u16 *)(ice40_spi->base) = 1 << i;
+		msleep(1000);
 	}
 
 

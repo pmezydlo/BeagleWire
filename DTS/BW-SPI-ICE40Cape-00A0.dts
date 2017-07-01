@@ -1,0 +1,30 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+	compatible = "ti,beaglebone", "ti,beaglebone-black";
+
+	/* Identification */
+	part-number = "BW-SPI-ICE40Cape";
+	version = "00A0";
+
+	fragment@0 {
+		target = <&ocp>;
+		__overlay__ {
+			ice40-spi {
+				#address-cells = <1>;
+				#size-cells = <0>;
+				num-cs = <2>;
+				reg = <0x1000000 0x2000>;
+				status = "okay";
+				compatible = "beagle,ice40-spi";
+
+				spidev@0 {
+					compatible = "linux,spidev";
+					spi-max-frequency = <50000000>;
+					reg = <0>;
+				};
+			};
+		};
+	};
+};

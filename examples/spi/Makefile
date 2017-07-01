@@ -1,11 +1,11 @@
-PROJ = arm_blink
+PROJ = spi
 BUILD = ./out
 DEVICE = 8k
 FOOTPRNT = tq144:4k
 
 SRC = top.v
 SRC += ../../components/gpmc-sync.v
-SRC += ../../components/dp-sync-ram.v
+SRC += ../../components/spi-master.v
 PIN_SRC = pinmap.pcf
 
 .PHONY: all load clean
