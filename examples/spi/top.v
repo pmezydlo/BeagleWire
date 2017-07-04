@@ -7,22 +7,44 @@ module top (input         clk,
             input         gpmc_oen,
             input         gpmc_clk,
             input  [1:0]  btn,
-            output [7:0]  pmod1,
-            output [7:0]  pmod2,
-            output [7:0]  pmod3,
-            output [7:0]  pmod4);
+
+            output        sck,
+            output        mosi,
+            input         miso,
+            output        spi_cs,
+            output [7:0]  spi_debug);
 
 parameter ADDR_WIDTH = 4;
 parameter DATA_WIDTH = 16;
 parameter RAM_DEPTH = 1 << ADDR_WIDTH;
 
-wire oe;
-wire we;
-wire cs;
-reg [ADDR_WIDTH-1:0]  address;
-reg [DATA_WIDTH-1:0]  data_out;
-wire[DATA_WIDTH-1:0]  data_in;
 reg [DATA_WIDTH-1:0] mem [0:RAM_DEPTH];
+
+reg oe;
+reg we;
+reg cs;
+wire[ADDR_WIDTH-1:0]  addr;
+reg [DATA_WIDTH-1:0]  data_out;
+wire [DATA_WIDTH-1:0]  data_in;
+
+always @ (posedge clk)
+begin
+    if (!cs && !we && oe) begin
+        mem[addr] <= data_out;
+    end
+end
+
+always @ (posedge clk)
+begin
+    if (!cs && we && !oe) begin
+        mem[1][0] <= busy;
+        mem[1][1] <= new_data;
+        mem[3][7:0] <= spi_data_out;
+        data_in <= mem[addr];
+    end else begin
+        data_in <= 0;
+    end
+end
 
 gpmc_sync #(
     .DATA_WIDTH(DATA_WIDTH),
@@ -40,78 +62,73 @@ gpmc_controller (
     .oe(oe),
     .we(we),
     .cs(cs),
-    .address(address),
+    .address(addr),
     .data_out(data_out),
     .data_in(data_in),
 );
 
-always @ (posedge clk)
-begin : MEM_WRITE
-    if (!cs && !we && oe) begin
-        mem[address] <= data_in;
-    end
-end
-
-always @ (posedge clk)
-begin : MEM_READ
-    if (!cs && we && !oe) begin
-        data_out <= mem[address];
-    end
-end
-
-assign led = mem[0][3:0];
-
-
 /* here should be spi controller
  * memory map
- * offset | name               | 
+ * offset | name               |
  *--------+--------------------+
- *    0   | setup register     | 
- *    2   | state register     | 
- *    4   | tranceive register | 
+ *    0   | setup register     |
+ *    2   | status register     |
+ *    4   | tranceive register |
  *    6   | receive register   |
+ *    8   | cs line register   |
+ *
  *
  * setup register
- *   bit  |      
+ *   bit  |
  *--------+--------------------+
  *    0   |  reset controller  |
- *   5-1  |  clock div         |
- *    6   |  send data         |
+ *    1   |  send data         |
  *
- * state register
+ * status register
  *   bit  |
  *--------+-----------------------+
  *    0   |  busy                 |
  *    1   |  new data for receive |
  *
- * 
+ * cs line register
+ *  bit   |
+ *--------+-----------------------+
+ *  7-0   |    each bit is one cs |
+ *        |    line               |
  */
-/*
-reg reset;
-reg start;
-reg clk_div[4:0];
 
-spi #(.CLK_DIV(20))
-spi_master (
+wire reset;
+wire start;
+
+wire busy;
+wire new_data;
+
+wire [7:0] spi_ata_in;
+reg [7:0] spi_data_out;
+
+assign reset = mem[0][0];
+assign start = mem[0][1];
+assign spi_data_in = mem[2][7:0];
+assign led[0] = spi_cs;
+
+assign spi_cs = mem[4][0];
+
+spi spi_master (
     .clk(clk),
-    .rst(1'b0),
-    .miso(),
-    .mosi(),
-    .sck(),
-    .start(),
-    .data_in(),
-    .data_out(),
-    .busy(),
-    .new_data(),
+    .rst(reset),
+    .miso(miso),
+    .mosi(mosi),
+    .sck(sck),
+    .start(start),
+    .data_in(spi_data_in),
+    .data_out(spi_data_out),
+    .busy(busy),
+    .new_data(new_data),
 );
 
-localparam IDLE           = 3'b000,
-           SET_RESET      = 3'b001,
-           SET_CLOCK      = 3'b010,
-           SET_START      = 3'b011,
-           SET_SEND_DATA  = 3'b001; 
+assign spi_debug[0] = reset;
+assign spi_debug[1] = start;
+assign spi_debug[2] = busy;
+assign spi_debug[3] = new_data;
 
-
-  */     
-       
 endmodule

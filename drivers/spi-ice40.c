@@ -21,14 +21,24 @@
 
 #define DRIVER_NAME "ice40-spi"
 
+#define ICE40_SPI_SETUP_REG	           0x0
+#define ICE40_SPI_STATUS_REG	           0x2
+#define ICE40_SPI_TX_REG                   0x4
+#define ICE40_SPI_RX_REG	           0x6
+#define ICE40_SPI_CS_REG                   0x8
+
+#define ICE40_SPI_SETUP_REG_RESET_BIT      BIT(0)
+#define ICE40_SPI_SETUP_REG_START_BIT      BIT(1)
+#define ICE40_SPI_STATUS_REG_BUSY_BIT      BIT(0)
+#define ICE40_SPI_STATUS_REG_NEW_DATA_BIT  BIT(1)
+
 struct ice40_spi {
 	struct spi_master *master;
 	void __iomem      *base;
 
 };
 
-
-inline unsigned int ice40_spi_read_reg(void __iomem *base, u32 idx)
+inline u16 ice40_spi_read_reg(void __iomem *base, u32 idx)
 {
 	return ioread16(base + idx);
 }
@@ -59,13 +69,54 @@ static int ice40_spi_transfer_one(struct spi_master *master,
 				  struct spi_device *spi,
 				  struct spi_transfer *t)
 {
+	struct ice40_spi *ice40_spi;
+	int count;
+	void __iomem *tx_reg;
+	void __iomem *rx_reg;
+	void __iomem *setup_reg;
+	void __iomem *status_reg;
+	u8 *rx;
+	const u8 *tx;
 
+	ice40_spi = spi_master_get_devdata(spi->master);
+	tx_reg = ice40_spi->base + ICE40_SPI_TX_REG;
+	rx_reg = ice40_spi->base + ICE40_SPI_RX_REG;
+	setup_reg = ice40_spi->base + ICE40_SPI_SETUP_REG;
+	status_reg = ice40_spi->base + ICE40_SPI_STATUS_REG;
+	count = t->len;
+
+	rx = t->rx_buf;
+	tx = t->tx_buf;
+
+	do {
+		count -= 1;
+
+		if (tx != NULL) {
+
+		}
+
+		if (rx != NULL) {
+
+		}
+
+
+	} while (count);
+
+        pr_info("spi transfer one");
 	return 0;
 }
 
 static int ice40_spi_setup(struct spi_device *spi)
 {
+	struct ice40_spi *ice40_spi;
 
+	ice40_spi = spi_master_get_devdata(spi->master);
+
+	/*set cs line to 1*/
+	ice40_spi_write_reg(ice40_spi->base, ICE40_SPI_CS_REG, 1);
+
+
+	pr_info("spi setup");
 	return 0;
 }
 
@@ -74,23 +125,22 @@ static int ice40_spi_probe(struct platform_device *pdev)
 	struct spi_master *master;
 	struct ice40_spi  *ice40_spi;
 	struct resource *res;
-	int err;
-	int i = 0;
+	int status;
 
 	pr_info("ice40 spi probe");
 
 	master = spi_alloc_master(&pdev->dev, sizeof(struct ice40_spi));
-
 	if (!master)
-		return -ENODEV;
+		return -ENOMEM;
 
 	master->bus_num = pdev->id;
 	master->num_chipselect = 1;
-	master->mode_bits = SPI_CS_HIGH | SPI_CPOL | SPI_CPHA;
-	//master->max_speed_hz =
+	master->mode_bits = SPI_CS_HIGH;
 	master->setup = ice40_spi_setup;
 	master->transfer_one = ice40_spi_transfer_one;
 	master->dev.of_node = pdev->dev.of_node;
+	master->max_speed_hz = 10000000;
+	master->bits_per_word_mask = SPI_BPW_RANGE_MASK(8, 8);
 
 	platform_set_drvdata(pdev, master);
 	ice40_spi = spi_master_get_devdata(master);
@@ -99,25 +149,26 @@ static int ice40_spi_probe(struct platform_device *pdev)
 	ice40_spi->base = devm_ioremap_resource(&pdev->dev, res);
 
 	if (IS_ERR(ice40_spi->base)) {
-		err = PTR_ERR(ice40_spi->base);
+		status = PTR_ERR(ice40_spi->base);
 		goto exit;
 	}
 
-	for (i = 0; i <= 4; i++) {
-		pr_info("leds write: %d", 1 << i);
-		*(u16 *)(ice40_spi->base) = 1 << i;
-		msleep(1000);
+	status = devm_spi_register_master(&pdev->dev, master);
+	if (status < 0) {
+		pr_info("SPI master registration failed");
+		goto  exit;
 	}
 
-
-	return 0;
+	return status;
 exit:
 	spi_master_put(master);
-	return err;
+	return status;
 }
 
 static int ice40_spi_remove(struct platform_device *pdev)
 {
+	struct spi_master *master = platform_get_drvdata(pdev);
+	struct ice40_spi  *ice40_spi = spi_master_get_devdata(master);
 
 	return 0;
 }

@@ -10,7 +10,9 @@ module spi(
     output busy,
     output new_data
   );
-  parameter CLK_DIV = 2; 
+
+  parameter CLK_DIV = 20; 
+    
   localparam STATE_SIZE = 2;
   localparam IDLE = 2'd0,
     WAIT_HALF = 2'd1,
