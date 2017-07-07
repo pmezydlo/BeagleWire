@@ -97,6 +97,10 @@ gpmc_controller (
  *        |    line               |
  */
 
+initial begin
+    mem[0][0] <= 1'b1;
+end
+
 wire reset;
 wire start;
 
@@ -126,8 +130,8 @@ spi spi_master (
     .new_data(new_data),
 );
 
-assign spi_debug[0] = reset;
-assign spi_debug[1] = start;
+assign led[1] = reset;
+assign led[2] = start;
 assign spi_debug[2] = busy;
 assign spi_debug[3] = new_data;
 

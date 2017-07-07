@@ -71,27 +71,33 @@ static int ice40_spi_transfer_one(struct spi_master *master,
 {
 	struct ice40_spi *ice40_spi;
 	int count;
-	void __iomem *tx_reg;
-	void __iomem *rx_reg;
-	void __iomem *setup_reg;
-	void __iomem *status_reg;
+
 	u8 *rx;
 	const u8 *tx;
+	u16 setup_reg_cache;
 
 	ice40_spi = spi_master_get_devdata(spi->master);
-	tx_reg = ice40_spi->base + ICE40_SPI_TX_REG;
-	rx_reg = ice40_spi->base + ICE40_SPI_RX_REG;
-	setup_reg = ice40_spi->base + ICE40_SPI_SETUP_REG;
-	status_reg = ice40_spi->base + ICE40_SPI_STATUS_REG;
 	count = t->len;
 
 	rx = t->rx_buf;
 	tx = t->tx_buf;
+	/*set cs line to 0*/
+	ice40_spi_write_reg(ice40_spi->base, ICE40_SPI_CS_REG, 0);
+
+	msleep(1000);
 
 	do {
 		count -= 1;
 
 		if (tx != NULL) {
+			ice40_spi_write_reg(ice40_spi->base, ICE40_SPI_TX_REG, *tx);
+			setup_reg_cache = ice40_spi_read_reg(ice40_spi->base, ICE40_SPI_SETUP_REG);
+			pr_info("setup reg:%d", setup_reg_cache);
+			setup_reg_cache |= ICE40_SPI_SETUP_REG_START_BIT;
+			ice40_spi_write_reg(ice40_spi->base, ICE40_SPI_SETUP_REG, setup_reg_cache);
+			setup_reg_cache = ice40_spi_read_reg(ice40_spi->base, ICE40_SPI_SETUP_REG);
+			pr_info("setup reg:%d", setup_reg_cache);
+			pr_info("write: %d", *tx++);
 
 		}
 
@@ -99,8 +105,10 @@ static int ice40_spi_transfer_one(struct spi_master *master,
 
 		}
 
-
 	} while (count);
+
+	/*set cs line to 1*/
+	ice40_spi_write_reg(ice40_spi->base, ICE40_SPI_CS_REG, 1);
 
         pr_info("spi transfer one");
 	return 0;
@@ -109,12 +117,22 @@ static int ice40_spi_transfer_one(struct spi_master *master,
 static int ice40_spi_setup(struct spi_device *spi)
 {
 	struct ice40_spi *ice40_spi;
+	u16 setup_reg_cache;
 
 	ice40_spi = spi_master_get_devdata(spi->master);
 
 	/*set cs line to 1*/
 	ice40_spi_write_reg(ice40_spi->base, ICE40_SPI_CS_REG, 1);
 
+
+	/*clr reset bit*/
+	setup_reg_cache = ice40_spi_read_reg(ice40_spi->base, ICE40_SPI_SETUP_REG);
+	pr_info("setup: setup_reg_cache:%d", setup_reg_cache);
+	setup_reg_cache &= ~ICE40_SPI_SETUP_REG_RESET_BIT;
+	pr_info("setup: setup_reg_cache:%d", setup_reg_cache);
+	ice40_spi_write_reg(ice40_spi->base, ICE40_SPI_SETUP_REG, setup_reg_cache);
+	setup_reg_cache = ice40_spi_read_reg(ice40_spi->base, ICE40_SPI_SETUP_REG);
+	pr_info("setup: setup_reg_cache:%d", setup_reg_cache);
 
 	pr_info("spi setup");
 	return 0;

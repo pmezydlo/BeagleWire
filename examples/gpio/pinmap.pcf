@@ -43,18 +43,44 @@ set_io btn[0] 25
 set_io btn[1] 26
 
 # PMOD
-set_io sck 38
-set_io mosi 37
-set_io miso 41
-set_io spi_cs 39
 
-set_io spi_debug[0] 48
-set_io spi_debug[1] 47
-set_io spi_debug[2] 52
-set_io spi_debug[3] 49
-set_io spi_debug[4] 56
-set_io spi_debug[5] 55
-set_io spi_debug[6] 62
-set_io spi_debug[7] 60
+# pmod
+set_io pmod1[0] 38
+set_io pmod1[1] 37
+set_io pmod1[2] 41
+set_io pmod1[3] 39
+set_io pmod1[4] 43
+set_io pmod1[5] 42
+set_io pmod1[6] 45
+set_io pmod1[7] 44
+
+set_io pmod2[0] 48
+set_io pmod2[1] 47
+set_io pmod2[2] 52
+set_io pmod2[3] 49
+set_io pmod2[4] 56
+set_io pmod2[5] 55
+set_io pmod2[6] 62
+set_io pmod2[7] 60
+
+set_io pmod3[0] 117 
+set_io pmod3[1] 110
+set_io pmod3[2] 112
+set_io pmod3[3] 113
+set_io pmod3[4] 116
+set_io pmod3[5] 115
+set_io pmod3[6] 129
+set_io pmod3[7] 130
+
+set_io pmod4[0] 4
+set_io pmod4[1] 7
+set_io pmod4[2] 8
+set_io pmod4[3] 9
+set_io pmod4[4] 10
+set_io pmod4[5] 15
+set_io pmod4[6] 11
+set_io pmod4[7] 12
+
+
 
 
