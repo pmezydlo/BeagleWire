@@ -12,7 +12,7 @@ SB_IO # (
     .PACKAGE_PIN(io[0]),
     .OUTPUT_ENABLE(dir[0] == 1'b1),
     .D_OUT_0(Output[0]),
-    .D_IN_0(Input[0])
+    .D_IN_0(Input[0]),
 );
 
 //Tri-State buffer controll
@@ -23,7 +23,7 @@ SB_IO # (
     .PACKAGE_PIN(io[1]),
     .OUTPUT_ENABLE(dir[1] == 1'b1),
     .D_OUT_0(Output[1]),
-    .D_IN_0(Input[1])
+    .D_IN_0(Input[1]),
 );
 
 //Tri-State buffer controll
@@ -34,7 +34,7 @@ SB_IO # (
     .PACKAGE_PIN(io[2]),
     .OUTPUT_ENABLE(dir[2] == 1'b1),
     .D_OUT_0(Output[2]),
-    .D_IN_0(Input[2])
+    .D_IN_0(Input[2]),
 );
 
 //Tri-State buffer controll
@@ -45,7 +45,7 @@ SB_IO # (
     .PACKAGE_PIN(io[3]),
     .OUTPUT_ENABLE(dir[3] == 1'b1),
     .D_OUT_0(Output[3]),
-    .D_IN_0(Input[3])
+    .D_IN_0(Input[3]),
 );
 
 //Tri-State buffer controll
@@ -56,7 +56,7 @@ SB_IO # (
     .PACKAGE_PIN(io[4]),
     .OUTPUT_ENABLE(dir[4] == 1'b1),
     .D_OUT_0(Output[4]),
-    .D_IN_0(Input[4])
+    .D_IN_0(Input[4]),
 );
 
 //Tri-State buffer controll
@@ -67,7 +67,7 @@ SB_IO # (
     .PACKAGE_PIN(io[5]),
     .OUTPUT_ENABLE(dir[5] == 1'b1),
     .D_OUT_0(Output[5]),
-    .D_IN_0(Input[5])
+    .D_IN_0(Input[5]),
 );
 
 //Tri-State buffer controll
@@ -78,7 +78,7 @@ SB_IO # (
     .PACKAGE_PIN(io[6]),
     .OUTPUT_ENABLE(dir[6] == 1'b1),
     .D_OUT_0(Output[6]),
-    .D_IN_0(Input[6])
+    .D_IN_0(Input[6]),
 );
 
 //Tri-State buffer controll
@@ -89,7 +89,7 @@ SB_IO # (
     .PACKAGE_PIN(io[7]),
     .OUTPUT_ENABLE(dir[7] == 1'b1),
     .D_OUT_0(Output[7]),
-    .D_IN_0(Input[7])
+    .D_IN_0(Input[7]),
 );
 
 endmodule

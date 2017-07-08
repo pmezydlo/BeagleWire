@@ -8,12 +8,6 @@
 # USER CLOCK
 set_io clk 61
 
-# LED
-set_io led[0] 28
-set_io led[1] 29
-set_io led[2] 31
-set_io led[3] 32
-
 #GPMC
 set_io gpmc_ad[0] 134
 set_io gpmc_ad[1] 136
@@ -38,13 +32,27 @@ set_io gpmc_clk 142
 set_io gpmc_wein 18
 set_io gpmc_oen 20
 
-# BUTTON
-set_io btn[0] 25
-set_io btn[1] 26
+# LED, BTN, SW
+set_io sw_btn_led[0] 28
+set_io sw_btn_led[1] 29
+set_io sw_btn_led[2] 31
+set_io sw_btn_led[3] 32
+set_io sw_btn_led[4] 25
+set_io sw_btn_led[5] 26
+set_io sw_btn_led[6] 33
+set_io sw_btn_led[7] 34
+
+# GROVE
+set_io gr[0] 73
+set_io gr[1] 74
+set_io gr[2] 75
+set_io gr[3] 76
+set_io gr[4] 104
+set_io gr[5] 102
+set_io gr[6] 106
+set_io gr[7] 105
 
 # PMOD
-
-# pmod
 set_io pmod1[0] 38
 set_io pmod1[1] 37
 set_io pmod1[2] 41

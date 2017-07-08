@@ -1,17 +1,17 @@
 module top (input         clk,
-            output [3:0]  led,
             inout  [15:0] gpmc_ad,
             input         gpmc_advn,
             input         gpmc_csn1,
             input         gpmc_wein,
             input         gpmc_oen,
             input         gpmc_clk,
-            input  [1:0]  btn,
+        
             inout [7:0]   pmod1,
             inout [7:0]   pmod2,
             inout [7:0]   pmod3,
             inout [7:0]   pmod4,
-);
+            inout [7:0]   sw_btn_led,
+            inout [7:0]   gr);
 
 parameter ADDR_WIDTH = 4;
 parameter DATA_WIDTH = 16;
@@ -26,6 +26,10 @@ wire[ADDR_WIDTH-1:0]  addr;
 reg [DATA_WIDTH-1:0]  data_out;
 wire [DATA_WIDTH-1:0]  data_in;
 
+wire [47:0] dir;
+wire [47:0] Inputs;
+wire [47:0] Outputs;
+
 always @ (posedge clk)
 begin
     if (!cs && !we && oe) begin
@@ -36,10 +40,9 @@ end
 always @ (posedge clk)
 begin
     if (!cs && we && !oe) begin
-        mem[2][7:0] <= Output[7:0];
-        mem[2][15:8] <= Output[15:8];
-        mem[3][7:0] <= Output[23:16];
-        mem[3][15:8] <= Output[31:24];
+        mem[3] <= Inputs[15:0];
+        mem[4] <= Inputs[31:16];
+        mem[5] <= Inputs[47:32];
         data_in <= mem[addr];
     end else begin
         data_in <= 0;
@@ -73,47 +76,62 @@ gpmc_controller (
  *--------+--------------------+
  *    0   | direct register    |
  *    2   | direct register    |
- *    4   | output register    |
+ *    4   | direct regsiter    |
  *    6   | output register    |
- *    8   | input register     |
- *    10  | input register     |
+ *    8   | output register    |
+ *    10  | output register    |
+ *    12  | input register     |
+ *    14  | input regsiter     |
+ *    16  | input register     |
  */
-
-wire [31:0] dir;
-wire [31:0] Input;
-wire [31:0] Output;
 
 assign dir[15:0] = mem[0];
 assign dir[31:16] = mem[1];
-assign Input[15:0] = mem[4];
-assign Input[31:16] = mem[5];
+assign dir[47:32] = mem[2];
+assign Outputs[15:0] = mem[6];
+assign Outputs[31:16] = mem[7];
+assign Outputs[47:32] = mem[8];
 
 gpio_port port1 (
     .io(pmod1),
     .dir(dir[7:0]),
-    .Input(Input[7:0]),
-    .Output(Output[7:0]),
+    .Input(Inputs[7:0]),
+    .Output(Outputs[7:0]),
 );
 
 gpio_port port2 (
     .io(pmod2),
     .dir(dir[15:8]),
-    .Input(Input[15:8]),
-    .Output(Output[15:8]),
+    .Input(Inputs[15:8]),
+    .Output(Outputs[15:8]),
 );
 
 gpio_port port3 (
     .io(pmod3),
     .dir(dir[23:16]),
-    .Input(Input[23:16]),
-    .Output(Output[23:16]),
+    .Input(Inputs[23:16]),
+    .Output(Outputs[23:16]),
 );
 
 gpio_port port4 (
     .io(pmod4),
     .dir(dir[31:24]),
-    .Input(Input[31:24]),
-    .Output(Output[31:24]),
+    .Input(Inputs[31:24]),
+    .Output(Outputs[31:24]),
+);
+
+gpio_port port5 (
+    .io(gr),
+    .dir(dir[39:32]),
+    .Input(Inputs[39:32]),
+    .Output(Outputs[39:32]),
+);
+
+gpio_port port6 (
+    .io(sw_btn_led),
+    .dir(dir[47:40]),
+    .Input(Inputs[47:40]),
+    .Output(Outputs[47:40]),
 );
 
 endmodule
