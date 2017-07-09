@@ -30,6 +30,15 @@ script:
   - cd $DST_PROJECT/examples/blink_leds/
   - make
 
+  - cd $DST_PROJECT/examples/pll/
+  - make
+
+  - cd $DST_PROJECT/examples/spi/
+  - make
+
+  - cd $DST_PROJECT/examples/gpio/
+  - make
+
   - cd $DST_PROJECT/bridge_lib/
   - make
 
