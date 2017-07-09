@@ -69,7 +69,7 @@ gpmc_controller (
     *    0   |  setup
     *    2   |  period
     *    6   |  duty cycle
-    *    10   |  --
+    *    10  |  --
     */
 
 wire en;
@@ -79,10 +79,8 @@ wire [32:0] duty_cycle;
 
 assign en = mem[0][0];
 assign polarity = mem[0][1];
-assign period[31:16] = mem[1];
-assign period[15:0] = mem[2];
-assign duty_cycle[31:16] = mem[3];
-assign duty_cycle[15:0] = mem[4];
+assign period[15:0] = mem[1];
+assign duty_cycle[15:0] = mem[2];
 
 pwm pwm1 (
     .en(en),
