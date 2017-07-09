@@ -40,9 +40,9 @@ end
 always @ (posedge clk)
 begin
     if (!cs && we && !oe) begin
-        mem[3] <= Inputs[15:0];
-        mem[4] <= Inputs[31:16];
-        mem[5] <= Inputs[47:32];
+        mem[4] <= Inputs[15:0];
+        mem[5] <= Inputs[31:16];
+        mem[6] <= Inputs[47:32];
         data_in <= mem[addr];
     end else begin
         data_in <= 0;
@@ -72,25 +72,23 @@ gpmc_controller (
 
 /* 
  * memory map
- * offset | name   16 bit data |
- *--------+--------------------+
- *    0   | direct register    |
- *    2   | direct register    |
- *    4   | direct regsiter    |
- *    6   | output register    |
- *    8   | output register    |
- *    10  | output register    |
- *    12  | input register     |
- *    14  | input regsiter     |
- *    16  | input register     |
+ * offset | name   16 bit data       |
+ *--------+--------------------------+
+ *    0   | direct register          |
+ *    2   | direct register          |
+ *    4   | direct regsiter          |
+ *    6   | -----------------------  |
+ *    8   | output/input register    |
+ *    10  | output/input register    |
+ *    12  | output/input register    |
  */
 
 assign dir[15:0] = mem[0];
 assign dir[31:16] = mem[1];
 assign dir[47:32] = mem[2];
-assign Outputs[15:0] = mem[6];
-assign Outputs[31:16] = mem[7];
-assign Outputs[47:32] = mem[8];
+assign Outputs[15:0] = mem[4];
+assign Outputs[31:16] = mem[5];
+assign Outputs[47:32] = mem[6];
 
 gpio_port port1 (
     .io(pmod1),
