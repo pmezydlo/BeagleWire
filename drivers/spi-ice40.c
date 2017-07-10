@@ -70,47 +70,60 @@ static int ice40_spi_transfer_one(struct spi_master *master,
 				  struct spi_transfer *t)
 {
 	struct ice40_spi *ice40_spi;
-	int count;
-
+	unsigned int count;
 	u8 *rx;
 	const u8 *tx;
 	u16 setup_reg_cache;
 
 	ice40_spi = spi_master_get_devdata(spi->master);
 	count = t->len;
-
 	rx = t->rx_buf;
 	tx = t->tx_buf;
 	/*set cs line to 0*/
 	ice40_spi_write_reg(ice40_spi->base, ICE40_SPI_CS_REG, 0);
-
-	msleep(1000);
-
+	udelay(100);
 	do {
 		count -= 1;
 
-		if (tx != NULL) {
-			ice40_spi_write_reg(ice40_spi->base, ICE40_SPI_TX_REG, *tx);
-			setup_reg_cache = ice40_spi_read_reg(ice40_spi->base, ICE40_SPI_SETUP_REG);
-			pr_info("setup reg:%d", setup_reg_cache);
-			setup_reg_cache |= ICE40_SPI_SETUP_REG_START_BIT;
-			ice40_spi_write_reg(ice40_spi->base, ICE40_SPI_SETUP_REG, setup_reg_cache);
-			setup_reg_cache = ice40_spi_read_reg(ice40_spi->base, ICE40_SPI_SETUP_REG);
-			pr_info("setup reg:%d", setup_reg_cache);
-			pr_info("write: %d", *tx++);
+		if (tx != NULL)
+			ice40_spi_write_reg(ice40_spi->base, ICE40_SPI_TX_REG,
+					    *tx++);
 
+		/*delay between next byte*/
+		udelay(20);
+
+		/*set start flag*/
+		setup_reg_cache = ice40_spi_read_reg(ice40_spi->base,
+						     ICE40_SPI_SETUP_REG);
+		setup_reg_cache |= ICE40_SPI_SETUP_REG_START_BIT;
+		ice40_spi_write_reg(ice40_spi->base, ICE40_SPI_SETUP_REG,
+				    setup_reg_cache);
+
+		/*wait for end of one byte transfer*/
+		if (ice40_spi_wait_for_bit(ice40_spi->base
+					   + ICE40_SPI_STATUS_REG,
+			ICE40_SPI_STATUS_REG_NEW_DATA_BIT) < 0) {
+			pr_err("Timed out");
+			goto out;
 		}
 
-		if (rx != NULL) {
+		if (rx != NULL)
+			*rx++ = (u8)ice40_spi_read_reg(ice40_spi->base,
+						       ICE40_SPI_RX_REG);
 
-		}
+		/*clear start flag*/
+		setup_reg_cache = ice40_spi_read_reg(ice40_spi->base,
+						     ICE40_SPI_SETUP_REG);
+		setup_reg_cache &= ~ICE40_SPI_SETUP_REG_START_BIT;
+		ice40_spi_write_reg(ice40_spi->base, ICE40_SPI_SETUP_REG,
+				    setup_reg_cache);
 
 	} while (count);
+	udelay(100);
 
+out:
 	/*set cs line to 1*/
 	ice40_spi_write_reg(ice40_spi->base, ICE40_SPI_CS_REG, 1);
-
-        pr_info("spi transfer one");
 	return 0;
 }
 
@@ -121,18 +134,15 @@ static int ice40_spi_setup(struct spi_device *spi)
 
 	ice40_spi = spi_master_get_devdata(spi->master);
 
-	/*set cs line to 1*/
+	/*set cs line */
 	ice40_spi_write_reg(ice40_spi->base, ICE40_SPI_CS_REG, 1);
 
-
 	/*clr reset bit*/
-	setup_reg_cache = ice40_spi_read_reg(ice40_spi->base, ICE40_SPI_SETUP_REG);
-	pr_info("setup: setup_reg_cache:%d", setup_reg_cache);
+	setup_reg_cache = ice40_spi_read_reg(ice40_spi->base,
+					     ICE40_SPI_SETUP_REG);
 	setup_reg_cache &= ~ICE40_SPI_SETUP_REG_RESET_BIT;
-	pr_info("setup: setup_reg_cache:%d", setup_reg_cache);
-	ice40_spi_write_reg(ice40_spi->base, ICE40_SPI_SETUP_REG, setup_reg_cache);
-	setup_reg_cache = ice40_spi_read_reg(ice40_spi->base, ICE40_SPI_SETUP_REG);
-	pr_info("setup: setup_reg_cache:%d", setup_reg_cache);
+	ice40_spi_write_reg(ice40_spi->base, ICE40_SPI_SETUP_REG,
+			    setup_reg_cache);
 
 	pr_info("spi setup");
 	return 0;
@@ -187,6 +197,14 @@ static int ice40_spi_remove(struct platform_device *pdev)
 {
 	struct spi_master *master = platform_get_drvdata(pdev);
 	struct ice40_spi  *ice40_spi = spi_master_get_devdata(master);
+	u16 setup_reg_cache;
+
+	/*set reset bit - stop spi controller*/
+	setup_reg_cache = ice40_spi_read_reg(ice40_spi->base,
+					     ICE40_SPI_SETUP_REG);
+	setup_reg_cache |= ICE40_SPI_SETUP_REG_RESET_BIT;
+	ice40_spi_write_reg(ice40_spi->base, ICE40_SPI_SETUP_REG,
+			    setup_reg_cache);
 
 	return 0;
 }

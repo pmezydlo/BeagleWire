@@ -11,7 +11,12 @@ module spi(
     output new_data
   );
 
-  parameter CLK_DIV = 20; 
+  initial begin
+    new_data_d = 1'b0;
+
+end
+
+  parameter CLK_DIV = 2; 
     
   localparam STATE_SIZE = 2;
   localparam IDLE = 2'd0,
@@ -38,7 +43,6 @@ module spi(
     data_d = data_q;
     mosi_d = mosi_q;
     ctr_d = ctr_q;
-    new_data_d = 1'b0;
     data_out_d = data_out_q;
     state_d = state_q;
      
@@ -49,6 +53,7 @@ module spi(
         if (start == 1'b1) begin   // if start command
           data_d = data_in;        // copy data to send
           state_d = WAIT_HALF;     // change state
+          new_data_d = 1'b0;
         end
       end
       WAIT_HALF: begin

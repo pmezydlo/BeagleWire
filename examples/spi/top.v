@@ -67,6 +67,24 @@ gpmc_controller (
     .data_in(data_in),
 );
 
+wire clk_10m;
+wire lock;
+
+    SB_PLL40_CORE #(
+        .FEEDBACK_PATH("SIMPLE"),
+        .PLLOUT_SELECT("GENCLK"),
+        .DIVR(4'b0011),
+        .DIVF(7'b0101000),
+        .DIVQ(3'b110),
+        .FILTER_RANGE(3'b010)
+    ) uut (
+        .LOCK(lock),
+        .RESETB(1'b1),
+        .BYPASS(1'b0),
+        .REFERENCECLK(clk),
+        .PLLOUTCORE(clk_10m)
+    );
+
 /* here should be spi controller
  * memory map
  * offset | name               |
@@ -112,19 +130,16 @@ reg [7:0] spi_data_out;
 
 assign reset = mem[0][0];
 assign start = mem[0][1];
-assign spi_data_in = mem[2][7:0];
-assign led[0] = spi_cs;
-
 assign spi_cs = mem[4][0];
 
 spi spi_master (
-    .clk(clk),
+    .clk(clk_10m),
     .rst(reset),
     .miso(miso),
     .mosi(mosi),
     .sck(sck),
     .start(start),
-    .data_in(spi_data_in),
+    .data_in(mem[2][7:0]),
     .data_out(spi_data_out),
     .busy(busy),
     .new_data(new_data),
