@@ -1,0 +1,24 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+	compatible = "ti,beaglebone", "ti,beaglebone-black";
+
+	/* Identification */
+	part-number = "BW-GPIO-ICE40Cape";
+	version = "00A0";
+
+	fragment@0 {
+		target = <&ocp>;
+		__overlay__ {
+			gpio: gpio-controller@1000000 {
+				compatible = "brcm,bcm6345-gpio";
+				reg-names = "dirout", "dat";
+				reg = <0x1000000 0x8>, <0x1000008 0x8>;
+
+				#gpio-cells = <2>;
+				gpio-controller;
+			};
+		};
+	};
+};
