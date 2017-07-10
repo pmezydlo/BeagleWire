@@ -14,6 +14,7 @@ install:
 before_script:
   - export DST_PROJECT=$PWD
   - echo $DST_PROJECT
+  - sudo sh $DST_PROJECT/scripts/install_kernel.sh
 
 script:
   - sudo chmod +x $DST_PROJECT/scripts/install_IceStorm.sh
