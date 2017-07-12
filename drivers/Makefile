@@ -2,13 +2,11 @@ ARCH := arm
 COMPILER := arm-linux-gnueabihf-
 COMPILER_V := gcc
 PWD := $(shell pwd)
-KERN_V=4.4.30
-BUILD_V=-ti-r64
-SOURCE=KERNEL
+SOURCE_BRANCH="4.12"
+SOURCE_VERSION="rc7"
+KDIR := $(PWD)/../linux-stable-rcn-ee-$(SOURCE_BRANCH)-$(SOURCE_VERSION)
 
-KDIR := $(PWD)/../image/bb-kernel/KERNEL
-
-obj-m+= spi-ice40.o
+obj-m+= spi-ice40.o pwm-ice40.o
 
 all:
 	$(MAKE) -C $(KDIR) M=$(PWD) ARCH=$(ARCH) CROSS_COMPILE=$(COMPILER) modules

@@ -45,26 +45,16 @@ before_script:
   - sudo ./dtc.sh
 
 script:
-  - cd $DST_PROJECT/examples/arm_blink_leds/
-  - make
+  - make -C $DST_PROJECT/drivers/ ARCH=arm CROSS_COMPILE=${CC}
 
-  - cd $DST_PROJECT/examples/blink_leds/
-  - make
+  - make -C $DST_PROJECT/examples/arm_blink_leds/
+  - make -C $DST_PROJECT/examples/blink_leds/
+  - make -C $DST_PROJECT/examples/pll/
+  - make -C $DST_PROJECT/examples/spi/
+  - make -C $DST_PROJECT/examples/gpio/
+  - make -C $DST_PROJECT/examples/pwm/
 
-  - cd $DST_PROJECT/examples/pll/
-  - make
-
-  - cd $DST_PROJECT/examples/spi/
-  - make
-
-  - cd $DST_PROJECT/examples/gpio/
-  - make
-
-  - cd $DST_PROJECT/examples/pwm/
-  - make
-
-  - cd $DST_PROJECT/bridge_lib/
-  - make
+  - make -C $DST_PROJECT/bridge_lib/ ARCH=arm CROSS_COMPILE=${CC}
 
   - cd $DST_PROJECT/DTS
   - sudo dtc -O dtb -o BW-ICE40Cape-00A0.dtbo -b 0 -@ BW-ICE40Cape-00A0.dts
