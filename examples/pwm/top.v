@@ -9,8 +9,8 @@ module top (input         clk,
             input  [1:0]  btn,
             output [7:0]  pmod1,
             output [7:0]  pmod2,
-            output [7:0]  pmod3,            
-            output [7:0]  pmod4,); 
+            output [7:0]  pmod3,
+            output [7:0]  pmod4,);
 
 parameter ADDR_WIDTH = 4;
 parameter DATA_WIDTH = 16;
@@ -68,8 +68,8 @@ gpmc_controller (
     * offset | destination
     *    0   |  setup
     *    2   |  period
-    *    6   |  duty cycle
-    *    10  |  --
+    *    4   |  duty cycle
+    *    6  |  --
     */
 
 wire en;
