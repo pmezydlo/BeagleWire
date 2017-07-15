@@ -53,7 +53,7 @@ script:
   - make -C $DST_PROJECT/examples/spi/
   - make -C $DST_PROJECT/examples/gpio/
   - make -C $DST_PROJECT/examples/pwm/
-  - make -C $DTS_PROJECT/examples/uart/
+  - make -C $DST_PROJECT/examples/uart/
 
   - make -C $DST_PROJECT/bridge_lib/ ARCH=arm CROSS_COMPILE=${CC}
 
