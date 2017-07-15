@@ -23,15 +23,6 @@ reg [2:0] bit_pos = 3'b000;
 reg [1:0] state = IDLE;
 
 always @(posedge clk_100m) begin
-    if (counter == COUNTER_MAX) begin
-        
-    end else begin
-        
-    end
-        
-end
-
-always @(posedge clk_100m) begin
     case (state)
         IDLE: begin
             if (wr_en) begin

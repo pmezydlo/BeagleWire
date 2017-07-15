@@ -3,9 +3,6 @@ module uart_baud_gen(input          en,
                      input [15:0]   clk_div,
                      output         uart_clk_en);
 
-parameter CLK_FREQ_M = 100;
-parameter SER_FREQ = 9600
-
 reg [15:0] counter;
 reg uart_clk_en;
 

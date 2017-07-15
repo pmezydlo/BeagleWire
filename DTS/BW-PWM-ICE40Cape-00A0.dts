@@ -1,0 +1,23 @@
+/dts-v1/;
+/plugin/;
+
+/ {
+	compatible = "ti,beaglebone", "ti,beaglebone-black";
+
+	/* Identification */
+	part-number = "BW-PWM-ICE40Cape";
+	version = "00A0";
+
+	fragment@0 {
+		target = <&ocp>;
+		__overlay__ {
+			ice40-pwm {
+				#address-cells = <1>;
+				#size-cells = <0>;
+				reg = <0x1000000 0x2000>;
+				status = "okay";
+				compatible = "beagle,ice40-pwm";
+			};
+		};
+	};
+};
