@@ -8,8 +8,8 @@
 
 #define DRIVER_NAME "ice40-pwm"
 
-#define ICE40_PWM_SETUP_REG_EN_BIT BIT     (0)
-#define ICE40_PWM_SETUP_REG_POL_BIT BIT    (1)
+#define ICE40_PWM_SETUP_REG_EN_BIT         BIT(0)
+#define ICE40_PWM_SETUP_REG_POL_BIT        BIT(1)
 #define ICE40_PWM_SETUP_REG                0x0
 #define ICE40_PWM_PERIOD_REG               0x2
 #define ICE40_PWM_DUTY_CYCLE               0x4

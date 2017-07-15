@@ -11,3 +11,4 @@ all:
 
 clean:
 	$(MAKE) -C $(KDIR) M=$(PWD) ARCH=$(ARCH) clean
+

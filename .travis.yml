@@ -46,6 +46,8 @@ before_script:
 
 script:
   - make -C $DST_PROJECT/drivers/ ARCH=arm CROSS_COMPILE=${CC}
+  - sudo perl $DST_PROJECT/linux-stable-rcn-ee-$SOURCE_BRANCH-$SOURCE_VERSION/scripts/checkpatch.pl --no-tree -f drivers/spi-ice40.c
+  - sudo perl $DST_PROJECT/linux-stable-rcn-ee-$SOURCE_BRANCH-$SOURCE_VERSION/scripts/checkpatch.pl --no-tree -f drivers/pwm-ice40.c
 
   - make -C $DST_PROJECT/examples/arm_blink_leds/
   - make -C $DST_PROJECT/examples/blink_leds/
