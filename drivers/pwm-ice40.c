@@ -14,6 +14,8 @@
 #define ICE40_PWM_PERIOD_REG               0x2
 #define ICE40_PWM_DUTY_CYCLE               0x4
 
+#define ICE40_PWM_CLK_PERIOD		   10
+
 struct ice40_pwm {
 	struct pwm_chip chip;
 	struct device *dev;
@@ -67,7 +69,15 @@ static int ice40_pwm_config(struct pwm_chip *chip, struct pwm_device *pwm,
 			    int duty_ns, int period_ns)
 {
 	struct ice40_pwm *ice40_pwm = to_ice40_pwm(chip);
+	u16 clk_counter;
+	u16 duty_counter;
 
+	clk_counter = (u16)div_u64(period_ns, ICE40_PWM_CLK_PERIOD) - 1;
+	duty_counter = (u16)div_u64(duty_ns, ICE40_PWM_CLK_PERIOD) - 1;
+
+	ice40_pwm_write_reg(ice40_pwm->base, ICE40_PWM_PERIOD_REG, clk_counter);
+	ice40_pwm_write_reg(ice40_pwm->base, ICE40_PWM_DUTY_CYCLE,
+			    duty_counter);
 	return 0;
 }
 
@@ -123,6 +133,7 @@ static int ice40_pwm_probe(struct platform_device *pdev)
 		return ret;
 
 	platform_set_drvdata(pdev, ice40_pwm);
+
 	return 0;
 }
 
@@ -137,7 +148,6 @@ static const struct of_device_id ice40_pwm_of_match[] = {
 	{ .compatible = "beagle,ice40-pwm", },
 	{}
 };
-
 MODULE_DEVICE_TABLE(of, ice40_pwm_of_match);
 
 static struct platform_driver ice40_pwm_driver = {
