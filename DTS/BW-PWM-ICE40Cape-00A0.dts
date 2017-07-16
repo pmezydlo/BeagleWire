@@ -11,12 +11,13 @@
 	fragment@0 {
 		target = <&ocp>;
 		__overlay__ {
-			ice40-pwm {
+			pwm@1000000 {
 				#address-cells = <1>;
 				#size-cells = <0>;
 				reg = <0x1000000 0x2000>;
 				status = "okay";
 				compatible = "beagle,ice40-pwm";
+				pwm-device-id = <0>;
 			};
 		};
 	};
