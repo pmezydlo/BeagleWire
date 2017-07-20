@@ -62,14 +62,32 @@ gpmc_controller (
     .data_in(data_in),
 );
 
+wire clk_200m;
+wire lock;
+
+    SB_PLL40_CORE #(
+        .FEEDBACK_PATH("SIMPLE"),
+        .PLLOUT_SELECT("GENCLK"),
+        .DIVR(4'b0000),
+        .DIVF(7'b0000111),
+        .DIVQ(3'b010),
+        .FILTER_RANGE(3'b101)
+    ) uut (
+        .LOCK(lock),
+        .RESETB(1'b1),
+        .BYPASS(1'b0),
+        .REFERENCECLK(clk),
+        .PLLOUTCORE(clk_200m)
+    );
+
    /*
     * pwm memory map
     *
     * offset | destination
     *    0   |  setup
     *    2   |  period
-    *    4   |  duty cycle
-    *    6  |  --
+    *    6   |  duty cycle
+    *    10  |  --
     */
 
 wire en;
@@ -79,15 +97,18 @@ wire [32:0] duty_cycle;
 
 assign en = mem[0][0];
 assign polarity = mem[0][1];
-assign period[15:0] = mem[1];
-assign duty_cycle[15:0] = mem[2];
+assign period[15:0] = mem[2];
+assign period[31:16] = mem[1];
+
+assign duty_cycle[15:0] = mem[4];
+assign duty_cycle[31:16] = mem[3];
 
 pwm pwm1 (
     .en(en),
     .period(period),
     .duty_cycle(duty_cycle),
     .polarity(polarity),
-    .clk(clk),
+    .clk(clk_200m),
     .out(pmod1[0]),
 );
 

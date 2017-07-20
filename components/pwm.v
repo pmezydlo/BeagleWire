@@ -6,7 +6,7 @@ module pwm (input                     en,
             output                    out,
            );
 
-parameter COUNTER_WIDTH = 16;
+parameter COUNTER_WIDTH = 32;
 reg out_pwm;
 reg [COUNTER_WIDTH-1:0] count;
 
