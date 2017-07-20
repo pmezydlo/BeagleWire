@@ -8,11 +8,10 @@ module top (input         clk,
             input         gpmc_clk,
             input  [1:0]  btn,
 
-            output        sck,
-            output        mosi,
-            input         miso,
-            output        spi_cs,
-            output [7:0]  spi_debug);
+            output        spi_sck,
+            output        spi_mosi,
+            input         spi_miso,
+            output        spi_cs);
 
 parameter ADDR_WIDTH = 4;
 parameter DATA_WIDTH = 16;
@@ -39,7 +38,8 @@ begin
     if (!cs && we && !oe) begin
         mem[1][0] <= busy;
         mem[1][1] <= new_data;
-        mem[3][7:0] <= spi_data_out;
+        mem[5] <= spi_data_out[15:0];
+        mem[4] <= spi_data_out[31:16];
         data_in <= mem[addr];
     end else begin
         data_in <= 0;
@@ -67,22 +67,22 @@ gpmc_controller (
     .data_in(data_in),
 );
 
-wire clk_10m;
+wire clk_20m;
 wire lock;
 
     SB_PLL40_CORE #(
         .FEEDBACK_PATH("SIMPLE"),
         .PLLOUT_SELECT("GENCLK"),
-        .DIVR(4'b0011),
-        .DIVF(7'b0101000),
-        .DIVQ(3'b110),
+        .DIVR(4'b0100),
+        .DIVF(7'b0011111),
+        .DIVQ(3'b101),
         .FILTER_RANGE(3'b010)
     ) uut (
         .LOCK(lock),
         .RESETB(1'b1),
         .BYPASS(1'b0),
         .REFERENCECLK(clk),
-        .PLLOUTCORE(clk_10m)
+        .PLLOUTCORE(clk_20m)
     );
 
 /* here should be spi controller
@@ -90,17 +90,20 @@ wire lock;
  * offset | name               |
  *--------+--------------------+
  *    0   | setup register     |
- *    2   | status register     |
+ *    2   | status register    |
  *    4   | tranceive register |
- *    6   | receive register   |
- *    8   | cs line register   |
- *
+ *    8   | receive register   |
  *
  * setup register
  *   bit  |
  *--------+--------------------+
  *    0   |  reset controller  |
  *    1   |  send data         |
+ *    2   |  cpol bit          |
+ *    3   |  cpha bit          |
+ *    4   |  cs   bit          |
+ *   9-5  |  bits per word     |
+ *  15-10 |  clock div         |
  *
  * status register
  *   bit  |
@@ -115,39 +118,60 @@ wire lock;
  *        |    line               |
  */
 
+localparam MAX_DATA_WIDTH = 32;
+
+// set rest to 1
 initial begin
     mem[0][0] <= 1'b1;
 end
 
 wire reset;
 wire start;
+wire cpol;
+wire cpha;
+wire [4:0] bits_per_word;
+wire [5:0] div;
 
 wire busy;
 wire new_data;
 
-wire [7:0] spi_ata_in;
-reg [7:0] spi_data_out;
+wire [MAX_DATA_WIDTH-1:0] spi_data_in;
+reg  [MAX_DATA_WIDTH-1:0] spi_data_out;
 
-assign reset = mem[0][0];
-assign start = mem[0][1];
-assign spi_cs = mem[4][0];
+assign spi_data_in[15:0]  = mem[3];
+assign spi_data_in[31:16] = mem[2];
 
-spi spi_master (
-    .clk(clk_10m),
-    .rst(reset),
-    .miso(miso),
-    .mosi(mosi),
-    .sck(sck),
+assign reset         = mem[0][0];
+assign start         = mem[0][1];
+assign cpol          = mem[0][2];
+assign cpha          = mem[0][3];
+assign spi_cs        = mem[0][4];
+assign bits_per_word = mem[0][9:5];
+assign div           = mem[0][15:10];
+
+spi #(
+    .MAX_DATA_WIDTH(MAX_DATA_WIDTH))
+spi_master (
+    .clk(clk_20m),
+
+    .miso(spi_miso),
+    .mosi(spi_mosi),
+    .sck(spi_sck),
+
     .start(start),
-    .data_in(mem[2][7:0]),
+    .rst(reset),
+    .cpol(cpol),
+    .cpha(cpha),
+    .bits_per_word(bits_per_word),
+    .div(div),
+
+    .data_in(spi_data_in),
     .data_out(spi_data_out),
+
     .busy(busy),
-    .new_data(new_data),
+    .new_data(new_data)
 );
 
-assign led[1] = reset;
-assign led[2] = start;
-assign spi_debug[2] = busy;
-assign spi_debug[3] = new_data;
+assign led[0] = busy;
 
 endmodule

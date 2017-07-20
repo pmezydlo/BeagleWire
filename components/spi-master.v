@@ -1,119 +1,121 @@
-module spi(input             clk,
-           input             rst,
-           input             miso,
-           output            mosi,
-           output            sck,
-           input             start,
-           input   [7:0]     data_in,
-           output  [7:0]     data_out,
-           output            busy,
-           output            new_data);
+module spi(input                            clk,
 
-initial begin
-    new_data_d = 1'b0;
+           input                            miso,
+           output                           mosi,
+           output                           sck,
+
+           input                            rst,
+           input                            start,
+           input                            cpol,
+           input                            cpha,
+           input   [4:0]                    bits_per_word,
+           input   [5:0]                    div,
+
+           input   [MAX_DATA_WIDTH-1:0]     data_in,
+           output  [MAX_DATA_WIDTH-1:0]     data_out,
+
+           output                           busy,
+           output                           new_data);
+
+parameter  MAX_DATA_WIDTH    = 32;
+
+localparam IDLE              = 3'd0;
+localparam START             = 3'd1;
+localparam TRANSFER_STAGE_1  = 3'd2;
+localparam TRANSFER_STAGE_2  = 3'd3;
+
+reg [1:0] state;
+reg [1:0] next_state;
+
+reg [4:0] ctrl;
+reg [4:0] next_ctrl;
+
+reg clk_div;
+reg [15:0] counter;
+
+reg new_data;
+
+reg sck;
+reg mosi;
+assign busy = state != IDLE;
+
+always @ (posedge clk)
+begin
+    if (counter == div) begin
+        clk_div <= !clk_div;
+        counter <= 0;
+    end else begin
+        counter <= counter + 1'b1;
+    end
 end
 
-parameter CLK_DIV = 2;
-localparam STATE_SIZE = 2;
-localparam IDLE = 2'd0;
-localparam WAIT_HALF = 2'd1;
-localparam TRANSFER = 2'd2;
-
-reg [STATE_SIZE-1:0] state_d;
-reg [STATE_SIZE-1:0] state_q;
-
-reg [7:0] data_d;
-reg [7:0] data_q;
-
-reg [CLK_DIV-1:0] sck_d;
-reg [CLK_DIV-1:0] sck_q;
-
-reg mosi_d;
-reg mosi_q;
-
-reg [2:0] ctr_d;
-reg [2:0] ctr_q;
-
-reg new_data_d;
-reg new_data_q;
-
-reg [7:0] data_out_d;
-reg [7:0] data_out_q;
-   
-assign mosi     = mosi_q;
-assign sck      = (~sck_q[CLK_DIV-1]) & (state_q == TRANSFER);
-assign busy     = state_q != IDLE;
-assign data_out = data_out_q;
-assign new_data = new_data_q;
-
-always @(*)
+always @ (posedge clk_div)
 begin
-    sck_d      <= sck_q;
-    data_d     <= data_q;
-    mosi_d     <= mosi_q;
-    ctr_d      <= ctr_q;
-    data_out_d <= data_out_q;
-    state_d    <= state_q;
-
-    case (state_q)
+    case (state)
         IDLE: begin
-            sck_d = 4'b0;
-            ctr_d = 3'b0;
-
+            sck <= cpol;
+            mosi <= 1'b0;
+            next_ctrl = 5'b00000;
             if (start == 1'b1) begin
-                data_d = data_in;
-                state_d = WAIT_HALF;
-                new_data_d = 1'b0;
+                next_state = START;
+                new_data <= 1'b0;
             end
         end
 
-        WAIT_HALF: begin
-            sck_d = sck_q + 1'b1;
-
-            if (sck_q == {CLK_DIV-1{1'b1}}) begin
-                sck_d = 1'b0;
-                state_d = TRANSFER;
-            end
-        end
-
-        TRANSFER: begin
-            sck_d = sck_q + 1'b1;
-
-            if (sck_q == 4'b0000) begin
-                mosi_d = data_q[7];
-            end else if (sck_q == {CLK_DIV-1{1'b1}}) begin
-                data_d = {data_q[6:0], miso};
-            end else if (sck_q == {CLK_DIV{1'b1}}) begin
-                ctr_d = ctr_q + 1'b1;
-
-                if (ctr_q == 3'b111) begin
-                    state_d = IDLE;
-                    data_out_d = data_q;
-                    new_data_d = 1'b1;
+        START: begin
+            if (start == 1'b0) begin
+                if (cpha == 1'b0) begin
+                    next_state = TRANSFER_STAGE_1;
+                end else begin
+                    next_state = TRANSFER_STAGE_2;
                 end
+            end
+        end
+
+        TRANSFER_STAGE_1: begin
+            next_state = TRANSFER_STAGE_2;
+            sck <= cpol;
+
+            if (cpha == 1'b0) begin
+                mosi <= data_in[bits_per_word-ctrl];
+            end else begin
+                data_out[bits_per_word-ctrl] <= miso;
+                next_ctrl = ctrl + 1'b1;
+            end
+
+            if (ctrl == bits_per_word && cpha == 1'b1) begin
+                next_state = IDLE;
+                new_data <= 1'b1;
+            end
+        end
+
+        TRANSFER_STAGE_2: begin
+            next_state = TRANSFER_STAGE_1;
+            sck <= !cpol;
+
+            if (cpha == 1'b0) begin
+                data_out[bits_per_word-ctrl] <= miso;
+                next_ctrl = ctrl + 1'b1;
+            end else begin
+                mosi <= data_in[bits_per_word-ctrl];
+            end
+
+            if (ctrl == bits_per_word && cpha == 1'b0) begin
+                next_state = IDLE;
+                new_data <= 1'b1;
             end
         end
     endcase
 end
 
-always @(posedge clk)
+always @ (posedge clk)
 begin
-    if (rst) begin
-        ctr_q <= 3'b0;
-        data_q <= 8'b0;
-        sck_q <= 4'b0;
-        mosi_q <= 1'b0;
-        state_q <= IDLE;
-        data_out_q <= 8'b0;
-        new_data_q <= 1'b0;
+    if (rst == 1'b1) begin
+        state <= IDLE;
+        ctrl <= 5'b00000;
     end else begin
-        ctr_q <= ctr_d;
-        data_q <= data_d;
-        sck_q <= sck_d;
-        mosi_q <= mosi_d;
-        state_q <= state_d;
-        data_out_q <= data_out_d;
-        new_data_q <= new_data_d;
+        ctrl <= next_ctrl;
+        state <= next_state;
     end
 end
 
