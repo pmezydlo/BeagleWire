@@ -11,10 +11,13 @@
 #define ICE40_PWM_SETUP_REG_EN_BIT         BIT(0)
 #define ICE40_PWM_SETUP_REG_POL_BIT        BIT(1)
 #define ICE40_PWM_SETUP_REG                0x0
-#define ICE40_PWM_PERIOD_REG               0x2
-#define ICE40_PWM_DUTY_CYCLE               0x4
 
-#define ICE40_PWM_CLK_PERIOD		   10
+#define ICE40_PWM_PERIOD_MSB               0x2
+#define ICE40_PWM_PERIOD_LSB               0x4
+#define ICE40_PWM_DUTY_CYCLE_MSB           0x6
+#define ICE40_PWM_DUTY_CYCLE_LSB           0x8
+
+#define ICE40_PWM_CLK_PERIOD		   5
 
 struct ice40_pwm {
 	struct pwm_chip chip;
@@ -69,15 +72,24 @@ static int ice40_pwm_config(struct pwm_chip *chip, struct pwm_device *pwm,
 			    int duty_ns, int period_ns)
 {
 	struct ice40_pwm *ice40_pwm = to_ice40_pwm(chip);
-	u16 clk_counter;
-	u16 duty_counter;
+	u32 clk_counter;
+	u32 duty_counter;
 
-	clk_counter = (u16)div_u64(period_ns, ICE40_PWM_CLK_PERIOD) - 1;
-	duty_counter = (u16)div_u64(duty_ns, ICE40_PWM_CLK_PERIOD) - 1;
+	clk_counter = (u32)div_u64(period_ns, ICE40_PWM_CLK_PERIOD) - 1;
+	duty_counter = (u32)div_u64(duty_ns, ICE40_PWM_CLK_PERIOD) - 1;
 
-	ice40_pwm_write_reg(ice40_pwm->base, ICE40_PWM_PERIOD_REG, clk_counter);
-	ice40_pwm_write_reg(ice40_pwm->base, ICE40_PWM_DUTY_CYCLE,
-			    duty_counter);
+	ice40_pwm_write_reg(ice40_pwm->base, ICE40_PWM_PERIOD_MSB,
+			    (u16)(clk_counter >> 16));
+
+	ice40_pwm_write_reg(ice40_pwm->base, ICE40_PWM_PERIOD_LSB,
+			    (u16)clk_counter);
+
+	ice40_pwm_write_reg(ice40_pwm->base, ICE40_PWM_DUTY_CYCLE_MSB,
+			    (u16)(duty_counter >> 16));
+
+	ice40_pwm_write_reg(ice40_pwm->base, ICE40_PWM_DUTY_CYCLE_LSB,
+			    (u16)duty_counter);
+
 	return 0;
 }
 
