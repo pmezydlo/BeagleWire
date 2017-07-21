@@ -130,12 +130,13 @@ static int ice40_spi_pio_transfer(struct spi_master *master,
 			goto out;
 		}
 
-	//	if (rx != NULL) {
-	//
-			pr_info("rx:%x\n", ice40_spi_read(ice40_spi->base, ICE40_SPI_RX_REG_32));
-			pr_info("rx:%x\n", ice40_spi_read(ice40_spi->base, ICE40_SPI_RX_REG_16));
+		/*if (rx != NULL) {*/
+			pr_info("rx:%x\n", ice40_spi_read(ice40_spi->base,
+							  ICE40_SPI_RX_REG_32));
+			pr_info("rx:%x\n", ice40_spi_read(ice40_spi->base,
+							  ICE40_SPI_RX_REG_16));
 
-	//	}
+		/*}*/
 
 	} while (count);
 	udelay(100);
@@ -146,7 +147,7 @@ out:
 					 ICE40_SPI_SETUP_REG);
 	setup_reg_cache |= ICE40_SPI_SETUP_REG_CS_BIT;
 	ice40_spi_write(ice40_spi->base, ICE40_SPI_SETUP_REG,
-		        setup_reg_cache);
+			setup_reg_cache);
 	return 0;
 }
 
