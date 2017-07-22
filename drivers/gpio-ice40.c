@@ -51,6 +51,9 @@ inline void ice40_gpio_write(void __iomem *base,
 
 static int ice40_gpio_get(struct gpio_chip *gc, unsigned int offset)
 {
+	pr_info("ice40_gpio: get");
+
+	pr_info("offset:0x%x", offset);
 
 	return 0;
 }
@@ -59,25 +62,19 @@ static void ice40_gpio_set(struct gpio_chip *gc, unsigned int offset, int value)
 {
 	struct of_mm_gpio_chip *mm_gc;
 	struct ice40_gpio_chip *ice40_gpio;
-	unsigned long flags;
-	unsigned int data_reg;
 
 	mm_gc = to_of_mm_gpio_chip(gc);
 	ice40_gpio = gpiochip_get_data(gc);
 
-	data_reg = readl(mm_gc->regs + ALTERA_GPIO_DATA);
-
-	if (value)
-		data_reg |= BIT(offset);
-	else
-		data_reg &= ~BIT(offset);
-
-	writel(data_reg, mm_gc->regs + ALTERA_GPIO_DATA);
-
+	pr_info("offset:0x%x  value: 0x%x", offset, value);
 }
 
 static int ice40_gpio_dir_input(struct gpio_chip *gc, unsigned int offset)
 {
+
+	pr_info("ice40_gpio: dir input");
+
+	pr_info("offset:0x%x", offset);
 
 	return 0;
 }
@@ -85,6 +82,8 @@ static int ice40_gpio_dir_input(struct gpio_chip *gc, unsigned int offset)
 static int ice40_gpio_dir_output(struct gpio_chip *gc, unsigned int offset,
 				       int value)
 {
+	pr_info("ice40_gpio: dir output");
+	pr_info("offset:0x%x  value: 0x%x", offset, value);
 
 	return 0;
 }
@@ -102,11 +101,13 @@ static int ice40_gpio_probe(struct platform_device *pdev)
 	if (!ice40_gpio)
 		return -ENOMEM;
 
-	if (of_property_read_u32(node, "ice40_gpio,ngpio", &reg))
+	if (of_property_read_u32(node, "ice40-gpio,ngpio", &reg))
 		ice40_gpio->mmchip.gc.ngpio = ICE40_GPIO_MAX_NGPIO;
 
 	if (reg <= ICE40_GPIO_MAX_NGPIO)
 		ice40_gpio->mmchip.gc.ngpio = reg;
+
+	pr_info("reg: %d", reg);
 
 	ice40_gpio->mmchip.gc.direction_input    = ice40_gpio_dir_input;
 	ice40_gpio->mmchip.gc.direction_output   = ice40_gpio_dir_output;
@@ -122,6 +123,8 @@ static int ice40_gpio_probe(struct platform_device *pdev)
 	}
 
 	platform_set_drvdata(pdev, ice40_gpio);
+	pr_info("ice40_gpio: base: 0x%p", ice40_gpio->mmchip.regs);
+	pr_info("ice40_gpio: probe");
 
 	return 0;
 }
@@ -129,6 +132,8 @@ static int ice40_gpio_probe(struct platform_device *pdev)
 static int ice40_gpio_remove(struct platform_device *pdev)
 {
 	struct ice40_gpio_chip *ice40_gpio = platform_get_drvdata(pdev);
+
+	pr_info("ice40_gpio: remove");
 
 	of_mm_gpiochip_remove(&ice40_gpio->mmchip);
 

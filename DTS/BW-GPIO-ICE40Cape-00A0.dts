@@ -11,13 +11,14 @@
 	fragment@0 {
 		target = <&ocp>;
 		__overlay__ {
-			gpio: gpio-controller@1000000 {
-				compatible = "brcm,bcm6345-gpio";
-				reg-names = "dirout", "dat";
-				reg = <0x1000000 0x8>, <0x1000008 0x8>;
+			gpio_ice40: gpio-controller@1000000 {
+                                compatible = "beagle,ice40-gpio";
+				reg = <0x1000000>;
 
 				#gpio-cells = <2>;
 				gpio-controller;
+
+				nr-gpios = <64>;
 			};
 		};
 	};
