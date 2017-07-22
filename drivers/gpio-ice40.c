@@ -31,8 +31,8 @@
 #define ICE40_GPIO_DIR_15_0           0x4
 
 #define ICE40_GPIO_DATA_47_32         0x8
-#define ICE40_GPIO_DATA_31_16         0x10
-#define ICE40_GPIO_DATA_15_0          0x12
+#define ICE40_GPIO_DATA_31_16         0xA
+#define ICE40_GPIO_DATA_15_0          0xC
 
 struct ice40_gpio_chip {
 	struct of_mm_gpio_chip mmchip;

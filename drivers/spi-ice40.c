@@ -35,7 +35,7 @@
 #define ICE40_SPI_TX_REG_32                0x4
 #define ICE40_SPI_TX_REG_16		   0x6
 #define ICE40_SPI_RX_REG_32	           0x8
-#define ICE40_SPI_RX_REG_16                0x10
+#define ICE40_SPI_RX_REG_16                0xA
 
 #define ICE40_SPI_SETUP_REG_RESET_BIT      BIT(0)
 #define ICE40_SPI_SETUP_REG_START_BIT      BIT(1)

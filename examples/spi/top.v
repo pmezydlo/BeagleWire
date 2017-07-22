@@ -13,11 +13,11 @@ module top (input         clk,
             input         spi_miso,
             output        spi_cs);
 
-parameter ADDR_WIDTH = 5;
+parameter ADDR_WIDTH = 4;
 parameter DATA_WIDTH = 16;
 parameter RAM_DEPTH = 1 << ADDR_WIDTH;
 
-reg [DATA_WIDTH-1:0] mem [0:RAM_DEPTH];
+reg [DATA_WIDTH-1:0] mem [0:RAM_DEPTH-1];
 
 reg oe;
 reg we;
@@ -38,8 +38,8 @@ begin
     if (!cs && we && !oe) begin
         mem[1][0] <= busy;
         mem[1][1] <= new_data;
-        //mem[5] <= spi_data_out[15:0];
-        //mem[4] <= spi_data_out[31:16];
+        mem[5] <= spi_data_out[15:0];
+        mem[4] <= spi_data_out[31:16];
         data_in <= mem[addr];
     end else begin
         data_in <= 0;
@@ -123,9 +123,6 @@ localparam MAX_DATA_WIDTH = 32;
 // set rest to 1
 initial begin
     mem[0][0] <= 1'b1;
-    mem[5] <= 16'b0010010011000010;
-    mem[4] <= 16'b1101101100111101;
-    //spi_data_out <=
 end
 
 wire reset;
@@ -169,7 +166,7 @@ spi_master (
     .div(div),
 
     .data_in(spi_data_in),
-    .data_out(),
+    .data_out(spi_data_out),
 
     .busy(busy),
     .new_data(new_data)
