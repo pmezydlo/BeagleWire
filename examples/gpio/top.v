@@ -5,7 +5,7 @@ module top (input         clk,
             input         gpmc_wein,
             input         gpmc_oen,
             input         gpmc_clk,
-        
+
             inout [7:0]   pmod1,
             inout [7:0]   pmod2,
             inout [7:0]   pmod3,
@@ -13,7 +13,7 @@ module top (input         clk,
             inout [7:0]   sw_btn_led,
             inout [7:0]   gr);
 
-parameter ADDR_WIDTH = 4;
+parameter ADDR_WIDTH = 5;
 parameter DATA_WIDTH = 16;
 parameter RAM_DEPTH = 1 << ADDR_WIDTH;
 
@@ -40,9 +40,9 @@ end
 always @ (posedge clk)
 begin
     if (!cs && we && !oe) begin
-        mem[4] <= Inputs[15:0];
+        mem[6] <= Inputs[15:0];
         mem[5] <= Inputs[31:16];
-        mem[6] <= Inputs[47:32];
+        mem[4] <= Inputs[47:32];
         data_in <= mem[addr];
     end else begin
         data_in <= 0;
@@ -70,7 +70,7 @@ gpmc_controller (
     .data_in(data_in),
 );
 
-/* 
+/*
  * memory map
  * offset | name   16 bit data       |
  *--------+--------------------------+
@@ -78,17 +78,22 @@ gpmc_controller (
  *    2   | direct register          |
  *    4   | direct regsiter          |
  *    6   | -----------------------  |
- *    8   | output/input register    |
- *    10  | output/input register    |
- *    12  | output/input register    |
+ *    8   | output register          |
+ *    10  | output register          |
+ *    12  | output register          |
+ *    14  | -----------------------  |
+ *    16  | input register           |
+ *    18  | input register           |
+ *    20  | input register           |
+ *
  */
 
-assign dir[15:0] = mem[0];
+assign dir[15:0] = mem[2];
 assign dir[31:16] = mem[1];
-assign dir[47:32] = mem[2];
-assign Outputs[15:0] = mem[4];
+assign dir[47:32] = mem[0];
+assign Outputs[15:0] = mem[6];
 assign Outputs[31:16] = mem[5];
-assign Outputs[47:32] = mem[6];
+assign Outputs[47:32] = mem[4];
 
 gpio_port port1 (
     .io(pmod1),
