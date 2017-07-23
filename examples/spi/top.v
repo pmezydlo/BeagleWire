@@ -36,10 +36,10 @@ end
 always @ (posedge clk)
 begin
     if (!cs && we && !oe) begin
-        mem[1][0] <= busy;
-        mem[1][1] <= new_data;
-        mem[5] <= spi_data_out[15:0];
-        mem[4] <= spi_data_out[31:16];
+        mem[1][0] <= spi_busy;
+        mem[1][1] <= spi_new_data;
+        mem[5] <= spi_rx_data[15:0];
+        mem[4] <= spi_rx_data[31:16];
         data_in <= mem[addr];
     end else begin
         data_in <= 0;
@@ -70,22 +70,22 @@ gpmc_controller (
 wire clk_20m;
 wire lock;
 
-    SB_PLL40_CORE #(
-        .FEEDBACK_PATH("SIMPLE"),
-        .PLLOUT_SELECT("GENCLK"),
-        .DIVR(4'b0100),
-        .DIVF(7'b0011111),
-        .DIVQ(3'b101),
-        .FILTER_RANGE(3'b010)
-    ) uut (
-        .LOCK(lock),
-        .RESETB(1'b1),
-        .BYPASS(1'b0),
-        .REFERENCECLK(clk),
-        .PLLOUTCORE(clk_20m)
-    );
+SB_PLL40_CORE #(
+    .FEEDBACK_PATH("SIMPLE"),
+    .PLLOUT_SELECT("GENCLK"),
+    .DIVR(4'b0100),
+    .DIVF(7'b0011111),
+    .DIVQ(3'b101),
+    .FILTER_RANGE(3'b010)
+) uut (
+    .LOCK(lock),
+    .RESETB(1'b1),
+    .BYPASS(1'b0),
+    .REFERENCECLK(clk),
+    .PLLOUTCORE(clk_20m)
+);
 
-/* here should be spi controller
+/*
  * memory map
  * offset | name               |
  *--------+--------------------+
@@ -125,29 +125,29 @@ initial begin
     mem[0][0] <= 1'b1;
 end
 
-wire reset;
-wire start;
-wire cpol;
-wire cpha;
-wire [4:0] bits_per_word;
-wire [5:0] div;
+wire spi_reset;
+wire spi_start;
+wire spi_cpol;
+wire spi_cpha;
+wire [4:0] spi_bits_per_word;
+wire [5:0] spi_div;
 
-wire busy;
-wire new_data;
+wire spi_busy;
+wire spi_new_data;
 
-wire [MAX_DATA_WIDTH-1:0] spi_data_in;
-reg  [MAX_DATA_WIDTH-1:0] spi_data_out;
+wire [MAX_DATA_WIDTH-1:0] spi_tx_data;
+reg  [MAX_DATA_WIDTH-1:0] spi_rx_data;
 
-assign spi_data_in[15:0]  = mem[3];
-assign spi_data_in[31:16] = mem[2];
+assign spi_tx_data[15:0]  = mem[3];
+assign spi_tx_data[31:16] = mem[2];
 
-assign reset         = mem[0][0];
-assign start         = mem[0][1];
-assign cpol          = mem[0][2];
-assign cpha          = mem[0][3];
-assign spi_cs        = mem[0][4];
-assign bits_per_word = mem[0][9:5];
-assign div           = mem[0][15:10];
+assign spi_reset         = mem[0][0];
+assign spi_start         = mem[0][1];
+assign spi_cpol          = mem[0][2];
+assign spi_cpha          = mem[0][3];
+assign spi_cs            = mem[0][4];
+assign spi_bits_per_word = mem[0][9:5];
+assign spi_div           = mem[0][15:10];
 
 spi #(
     .MAX_DATA_WIDTH(MAX_DATA_WIDTH))
@@ -158,20 +158,20 @@ spi_master (
     .mosi(spi_mosi),
     .sck(spi_sck),
 
-    .start(start),
-    .rst(reset),
-    .cpol(cpol),
-    .cpha(cpha),
-    .bits_per_word(bits_per_word),
-    .div(div),
+    .start(spi_start),
+    .rst(spi_reset),
+    .cpol(spi_cpol),
+    .cpha(spi_cpha),
+    .bits_per_word(spi_bits_per_word),
+    .div(spi_div),
 
-    .data_in(spi_data_in),
-    .data_out(spi_data_out),
+    .data_in(spi_tx_data),
+    .data_out(spi_rx_data),
 
-    .busy(busy),
-    .new_data(new_data)
+    .busy(spi_busy),
+    .new_data(spi_new_data)
 );
 
-assign led[0] = busy;
+assign led[0] = spi_busy;
 
 endmodule
