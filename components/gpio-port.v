@@ -2,7 +2,6 @@ module gpio_port (inout  [7:0] io,
                   input  [7:0] dir,
                   input  [7:0] Input,
                   output [7:0] Output);
-              
 
 //Tri-State buffer controll
 SB_IO # (

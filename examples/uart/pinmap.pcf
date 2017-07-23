@@ -41,3 +41,13 @@ set_io gpmc_oen 20
 # BUTTON
 set_io btn[0] 25
 set_io btn[1] 26
+
+# PMOD
+set_io pmod1[0] 38
+set_io pmod1[1] 37
+set_io pmod1[2] 41
+set_io pmod1[3] 39
+set_io pmod1[4] 43
+set_io pmod1[5] 42
+set_io pmod1[6] 45
+set_io pmod1[7] 44

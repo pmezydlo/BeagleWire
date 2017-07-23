@@ -20,5 +20,5 @@ module_exit(ice40_uart_exit);
 
 MODULE_LICENSE("GPL v2");
 MODULE_AUTHOR("Patryk Mezydlo, <mezydlo.p@gmail.com>");
-MODULE_DESCRIPTION("Driver for PWM controller on the ice40 FPGA");
+MODULE_DESCRIPTION("Driver for UART controller on the ice40 FPGA");
 MODULE_VERSION("1.0");

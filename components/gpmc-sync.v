@@ -15,7 +15,7 @@ module gpmc_sync (input                    clk,
                   output [DATA_WIDTH-1:0]  data_out,
                   input  [DATA_WIDTH-1:0]  data_in);
 
-parameter ADDR_WIDTH = 5;
+parameter ADDR_WIDTH = 16;
 parameter DATA_WIDTH = 16;
 
 reg [ADDR_WIDTH-1:0] gpmc_addr;
