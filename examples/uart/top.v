@@ -62,39 +62,37 @@ gpmc_controller (
     .data_in(data_in),
 );
 
-wire        uart_clk_out;
-wire [15:0] uart_clk_div;
-wire        uart_clk_en;
+initial begin
+    mem[0][0] <= 1'b1;
+end
 
+wire        uart_tx_rst;
 wire [15:0] uart_tx_data;
 wire        uart_tx_en;
 reg         uart_tx_new_data;
 wire [4:0]  uart_tx_bits_per_word;
 wire        uart_tx_busy;
+wire [15:0] uart_tx_clk_div;
 
-assign uart_clk_en           = mem[0][0];
-assign uart_clk_div          = mem[3];
-
+assign uart_tx_clk_div       = mem[2];
+assign uart_tx_rst           = mem[0][0];
 assign uart_tx_en            = mem[0][1];
-assign uart_tx_bits_per_word = mem[0][8:4];/*verificate how long are the uart words*/
+assign uart_tx_bits_per_word = mem[0][8:4];
 assign uart_tx_data          = mem[1];
 
-uart_baud_gen uart1_bg (
-    .en(uart_clk_en),
+uart_tx uart1_tx (
+    .rst(uart_tx_rst),
+    .data_in(16'h0050),
+    .wr_en(uart_tx_en),
     .clk(clk),
-    .clk_div(uart_clk_div),
-    .clk_out(uart_clk_out),
+    .tx(pmod1[0]),
+    .new_data(uart_tx_new_data),
+    .busy(uart_tx_busy),
+    .bits_per_word(5'b01000),
+    .clk_div(uart_tx_clk_div),
 );
 
-uart_tx uart1_tx (
-    .data_in(uart_tx_data),
-    .wr_en(uart_tx_en),
-    .clk_100m(clk),
-    .tx(pmod1[0]),
-    .tx_new_data(uart_tx_new_data),
-    .tx_busy(uart_tx_busy),
-    .clken(uart_clk_out),
-    .bits_per_word(uart_tx_bits_per_word),
-);
+assign pmod1[1] = uart_tx_new_data;
+assign pmod1[2] = uart_tx_busy;
 
 endmodule
