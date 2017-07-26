@@ -42,70 +42,73 @@ assign busy = state != IDLE;
 always @ (posedge clk)
 begin
     if (counter == div) begin
-        clk_div <= !clk_div;
+        clk_div <= 1'b1;
         counter <= 0;
     end else begin
+        clk_div <= 1'b0;
         counter <= counter + 1'b1;
     end
 end
 
-always @ (posedge clk_div)
+always @ (posedge clk)
 begin
-    case (state)
-        IDLE: begin
-            sck <= cpol;
-            mosi <= 1'b0;
-            next_ctrl = 5'b00000;
-            if (start == 1'b1) begin
-                next_state = START;
-                new_data <= 1'b0;
-            end
-        end
-
-        START: begin
-            if (start == 1'b0) begin
-                if (cpha == 1'b0) begin
-                    next_state = TRANSFER_STAGE_1;
-                end else begin
-                    next_state = TRANSFER_STAGE_2;
+    if (clk_div) begin
+        case (state)
+            IDLE: begin
+                sck <= cpol;
+                mosi <= 1'b0;
+                next_ctrl = 5'b00000;
+                if (start == 1'b1) begin
+                    next_state = START;
+                    new_data <= 1'b0;
                 end
             end
-        end
 
-        TRANSFER_STAGE_1: begin
-            next_state = TRANSFER_STAGE_2;
-            sck <= cpol;
-
-            if (cpha == 1'b0) begin
-                mosi <= data_in[bits_per_word-ctrl];
-            end else begin
-                data_out[bits_per_word-ctrl] <= miso;
-                next_ctrl = ctrl + 1'b1;
+            START: begin
+                if (start == 1'b0) begin
+                    if (cpha == 1'b0) begin
+                        next_state = TRANSFER_STAGE_1;
+                    end else begin
+                        next_state = TRANSFER_STAGE_2;
+                    end
+                end
             end
 
-            if (ctrl == bits_per_word && cpha == 1'b1) begin
-                next_state = IDLE;
-                new_data <= 1'b1;
-            end
-        end
+            TRANSFER_STAGE_1: begin
+                next_state = TRANSFER_STAGE_2;
+                sck <= cpol;
 
-        TRANSFER_STAGE_2: begin
-            next_state = TRANSFER_STAGE_1;
-            sck <= !cpol;
+                if (cpha == 1'b0) begin
+                    mosi <= data_in[bits_per_word-ctrl];
+                end else begin
+                    data_out[bits_per_word-ctrl] <= miso;
+                    next_ctrl = ctrl + 1'b1;
+                end
 
-            if (cpha == 1'b0) begin
-                data_out[bits_per_word-ctrl] <= miso;
-                next_ctrl = ctrl + 1'b1;
-            end else begin
-                mosi <= data_in[bits_per_word-ctrl];
+                if (ctrl == bits_per_word && cpha == 1'b1) begin
+                    next_state = IDLE;
+                    new_data <= 1'b1;
+                end
             end
 
-            if (ctrl == bits_per_word && cpha == 1'b0) begin
-                next_state = IDLE;
-                new_data <= 1'b1;
+            TRANSFER_STAGE_2: begin
+                next_state = TRANSFER_STAGE_1;
+                sck <= !cpol;
+
+                if (cpha == 1'b0) begin
+                    data_out[bits_per_word-ctrl] <= miso;
+                    next_ctrl = ctrl + 1'b1;
+                end else begin
+                    mosi <= data_in[bits_per_word-ctrl];
+                end
+
+                if (ctrl == bits_per_word && cpha == 1'b0) begin
+                    next_state = IDLE;
+                    new_data <= 1'b1;
+                end
             end
-        end
-    endcase
+        endcase
+    end
 end
 
 always @ (posedge clk)
