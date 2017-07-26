@@ -5,7 +5,6 @@ module uart_tx (input    [15:0]   data_in,
                 output            tx,
                 output            busy,
                 input     [4:0]   bits_per_word,
-                output            new_data,
                 input             rst);
 
 localparam IDLE      = 3'b000;
@@ -58,7 +57,6 @@ always @(posedge clk) begin
             VER_START: begin
                 if (wr_en == 1'b0) begin
                     state <= START;
-                    new_data <= 1'b0;
                 end
             end
 
@@ -84,7 +82,6 @@ always @(posedge clk) begin
                 if (clken) begin
                     tx <= 1'b1;
                     state <= IDLE;
-                    new_data <= 1'b1;
                 end
             end
 
