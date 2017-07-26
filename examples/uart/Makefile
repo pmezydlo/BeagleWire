@@ -7,7 +7,7 @@ SRC = top.v
 SRC += ../../components/gpmc-sync.v
 SRC += ../../components/uart-tx.v
 SRC += ../../components/uart-rx.v
-SRC += ../../components/uart-baud-gen.v
+SRC += ../../components/fifo.v
 PIN_SRC = pinmap.pcf
 
 .PHONY: all load clean

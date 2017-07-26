@@ -33,8 +33,12 @@ end
 always @ (posedge clk)
 begin
     if (!cs && we && !oe) begin
-        mem[0][2] <= uart_tx_new_data;
-        mem[0][3] <= uart_tx_busy;
+  //      mem[0][2] <= uart_tx_new_data;
+  //      mem[0][3] <= uart_tx_busy;
+        mem[0][3] <= fifo_empty;
+        mem[0][4] <= fifo_full;
+        mem[2]    <= fifo_data_out;
+        mem[3][3:0] <= fifo_counter;
         data_in <= mem[addr];
     end else begin
         data_in <= 0;
@@ -62,6 +66,36 @@ gpmc_controller (
     .data_in(data_in),
 );
 
+initial begin
+    mem[0][0] <= 1'b1;
+end
+
+wire fifo_rst;
+wire [15:0] fifo_data_in;
+reg  [15:0] fifo_data_out;
+wire fifo_wr_en;
+wire fifo_rd_en;
+wire fifo_empty;
+wire fifo_full;
+wire [3:0] fifo_counter;
+
+assign fifo_rst     = mem[0][0];
+assign fifo_wr_en   = mem[0][1];
+assign fifo_rd_en   = mem[0][2];
+assign fifo_data_in = mem[1];
+
+fifo uart_fifo (
+    .clk(clk),
+    .rst(fifo_rst),
+    .in(fifo_data_in),
+    .out(fifo_data_out),
+    .wr_en_in(fifo_wr_en),
+    .rd_en_in(fifo_rd_en),
+    .empty(fifo_empty),
+    .full(fifo_full),
+    .counter(fifo_counter),
+);
+/*
 initial begin
     mem[0][0] <= 1'b1;
 end
@@ -94,5 +128,5 @@ uart_tx uart1_tx (
 
 assign pmod1[1] = uart_tx_new_data;
 assign pmod1[2] = uart_tx_busy;
-
+*/
 endmodule
