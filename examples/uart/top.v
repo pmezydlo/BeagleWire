@@ -104,6 +104,9 @@ uart_tx uart1_tx (
     .busy(tx_busy),
     .bits_per_word(5'b01000),// .bits_per_word(mem[3][7:3]),
     .clk_div(mem[5]),
+    .parity_en(1'b0),
+    .parity_evan_odd(1'b0),
+    .two_stop_bit(1'b0),
 );
 
 assign pmod1[1] = tx_busy;
