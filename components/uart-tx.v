@@ -57,7 +57,6 @@ always @(posedge clk) begin
             IDLE: begin
                 if (wr_en) begin
                     state <= VER_START;
-                    data <= data_in;
                     bit_pos <= 3'h0;
                 end
             end
@@ -65,12 +64,12 @@ always @(posedge clk) begin
             VER_START: begin
                 if (wr_en == 1'b0) begin
                     state <= START;
-                    data <= data_in;
                 end
             end
 
             START: begin
                 if (clken) begin
+                    data <= data_in;
                     tx <= 1'b0;
                     state <= DATA;
                     if (parity_evan_odd)

@@ -33,8 +33,7 @@ end
 always @ (posedge clk)
 begin
     if (!cs && we && !oe) begin
-
-        mem[3][2]    <= tx_busy;
+        mem[2][5]    <= tx_busy;
         mem[0][3]    <= fifo_empty;
         mem[0][4]    <= fifo_full;
         mem[0][10:5] <= fifo_counter;
@@ -67,15 +66,17 @@ gpmc_controller (
 
 initial begin
     mem[0][0] <= 1'b1;
+    mem[2][0] <= 1'b1;
 end
 
-wire transfer_en;
-assign transfer_en = (mem[3][1] && !tx_busy && !fifo_empty) ? 1'b1 : 1'b0;
-
+wire        transfer_en;
 reg  [15:0] fifo_data_out;
-wire fifo_empty;
-wire fifo_full;
-wire [5:0] fifo_counter;
+wire        fifo_empty;
+wire        fifo_full;
+wire [5:0]  fifo_counter;
+wire        tx_busy;
+
+assign transfer_en = (mem[2][1] && !tx_busy && !fifo_empty) ? 1'b1 : 1'b0;
 
 fifo uart_fifo (
     .clk(clk),
@@ -89,24 +90,18 @@ fifo uart_fifo (
     .counter(fifo_counter),
 );
 
-initial begin
-    mem[0][0] <= 1'b1;
-end
-
-wire tx_busy;
-
 uart_tx uart1_tx (
-    .rst(mem[3][0]),
+    .rst(mem[2][0]),
     .data_in(fifo_data_out),
     .wr_en(transfer_en),
     .clk(clk),
     .tx(pmod1[0]),
     .busy(tx_busy),
-    .bits_per_word(5'b01000),// .bits_per_word(mem[3][7:3]),
-    .clk_div(mem[5]),
-    .parity_en(1'b0),
-    .parity_evan_odd(1'b0),
-    .two_stop_bit(1'b0),
+    .bits_per_word(5'b00111),//mem[2][11:6]),
+    .clk_div(mem[3]),
+    .parity_en(mem[2][2]),
+    .parity_evan_odd(mem[2][3]),
+    .two_stop_bit(mem[2][4]),
 );
 
 assign pmod1[1] = tx_busy;
