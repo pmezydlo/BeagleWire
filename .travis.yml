@@ -49,8 +49,7 @@ script:
   - sudo perl $DST_PROJECT/linux-stable-rcn-ee-$SOURCE_BRANCH-$SOURCE_VERSION/scripts/checkpatch.pl --no-tree -f drivers/*.c
 
   - make -C $DST_PROJECT/examples/arm_blink_leds/
-  - make -C $DST_PROJECT/examples/blink_leds/
-  - make -C $DST_PROJECT/examples/pll/
+  - make -C $DST_PROJECT/examples/blink_leds/ 
   - make -C $DST_PROJECT/examples/spi/
   - make -C $DST_PROJECT/examples/gpio/
   - make -C $DST_PROJECT/examples/pwm/
