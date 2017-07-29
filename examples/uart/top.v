@@ -37,6 +37,10 @@ begin
         mem[0][3]    <= fifo_empty;
         mem[0][4]    <= fifo_full;
         mem[0][10:5] <= fifo_counter;
+        mem[6]       <= rx_data_out;
+        mem[4][5]    <= rx_busy;
+        mem[4][1]     <= rx_new_data;
+        mem[4][6]     <= rx_frame_error;
         data_in      <= mem[addr];
     end else begin
         data_in <= 0;
@@ -104,10 +108,28 @@ uart_tx uart1_tx (
     .two_stop_bit(mem[2][4]),
 );
 
-assign pmod1[1] = tx_busy;
-
 assign led[0] = fifo_empty;
 assign led[1] = fifo_full;
 assign led[2] = tx_busy;
+
+wire rx_data_out;
+wire rx_busy;
+wire rx_new_data;
+wire rx_frame_error;
+
+uart_rx uart1_rx (
+    .clk(clk),
+    .rst(mem[4][0]),
+    .clk_div(mem[5]),
+    .data_out(rx_data_out),
+    .rx(pmod1[2]),
+    .busy(rx_busy),
+    .new_data(rx_new_data),
+    .frame_error(rx_frame_error),
+    .bits_per_word(5'b00111),
+    .parity_en(mem[4][2]),
+    .parity_evan_odd(mem[4][3]),
+    .two_stop_bit(mem[4][4]),
+);
 
 endmodule
