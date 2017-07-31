@@ -51,3 +51,12 @@ set_io pmod1[4] 43
 set_io pmod1[5] 42
 set_io pmod1[6] 45
 set_io pmod1[7] 44
+
+set_io pmod2[0] 48
+set_io pmod2[1] 47
+set_io pmod2[2] 52
+set_io pmod2[3] 49
+set_io pmod2[4] 56
+set_io pmod2[5] 55
+set_io pmod2[6] 62
+set_io pmod2[7] 60

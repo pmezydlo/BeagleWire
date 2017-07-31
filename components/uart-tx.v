@@ -50,14 +50,14 @@ end
 always @(posedge clk) begin
     if (rst) begin
         state <= IDLE;
-        bit_pos <= 3'b000;
+        bit_pos <= 5'b00000;
         tx <= 1'b1;
     end else begin
         case (state)
             IDLE: begin
                 if (wr_en) begin
                     state <= VER_START;
-                    bit_pos <= 3'h0;
+                    bit_pos <= 5'h0;
                 end
             end
 

@@ -9,17 +9,19 @@ module uart_rx(input             clk,
                input     [4:0]   bits_per_word,
                input             parity_en,
                input             parity_evan_odd,
-               input             two_stop_bit);
+               input             two_stop_bit,
+               output            probe);
+
 
 localparam IDLE      = 3'b000;
-localparam START     = 3'b001;
-localparam VER_START = 3'b010;
 localparam DATA      = 3'b011;
 localparam STOP      = 3'b100;
 localparam STOP2     = 3'b101;
 localparam PARITY    = 3'b110;
-localparam END       = 3'b111;
 
+assign busy = (state != IDLE) ? 1'b1 : 1'b0;
+
+reg        probe;
 reg [15:0] counter;
 reg        clken;
 reg [3:0]  state;
@@ -46,6 +48,7 @@ end
 
 always @ (posedge clk)
 begin
+    probe <= 1'b0;
     if (rst) begin
         next_state <= IDLE;
         next_bit_pos <= 5'b00000;
@@ -67,7 +70,9 @@ begin
                             next_state <= STOP;
                     else
                         next_bit_pos <= bit_pos + 1;
-                    data_out[bit_pos] <= rx;
+               
+                    probe <= 1'b1;
+                    data_out[bit_pos] = rx;
                 end
 
                 PARITY: begin
@@ -75,19 +80,19 @@ begin
                 end
 
                 STOP: begin
-        //            if (rx == 0)
-            //            frame_error =| 1;
+                    if (rx == 0)
+                        frame_error =| 1;
 
-              //      if (two_stop_bit)
-             //           next_state <= STOP2;
-             //       else
+                    if (two_stop_bit)
+                        next_state <= STOP2;
+                    else
                         next_state <= IDLE;
                         new_data <= 1'b1;
                 end
 
                 STOP2: begin
-           //         if (rx == 0)
-             //           frame_error =| 1;
+                    if (rx == 0)
+                        frame_error =| 1;
                     next_state <= IDLE;
                 end
 
