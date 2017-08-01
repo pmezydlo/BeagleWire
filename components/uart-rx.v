@@ -9,9 +9,7 @@ module uart_rx(input             clk,
                input     [4:0]   bits_per_word,
                input             parity_en,
                input             parity_evan_odd,
-               input             two_stop_bit,
-               output            probe);
-
+               input             two_stop_bit);
 
 localparam IDLE      = 3'b000;
 localparam DATA      = 3'b011;
@@ -21,14 +19,15 @@ localparam PARITY    = 3'b110;
 
 assign busy = (state != IDLE) ? 1'b1 : 1'b0;
 
-reg        probe;
 reg [15:0] counter;
 reg        clken;
-reg [3:0]  state;
-reg [3:0]  next_state;
+reg [2:0]  state;
+reg [2:0]  next_state;
 reg [4:0]  bit_pos;
 reg [4:0]  next_bit_pos;
 reg [15:0] data_out;
+reg        parity_bit;
+reg        next_parity_bit;
 
 always @(posedge clk)
 begin
@@ -48,10 +47,10 @@ end
 
 always @ (posedge clk)
 begin
-    probe <= 1'b0;
     if (rst) begin
         next_state <= IDLE;
         next_bit_pos <= 5'b00000;
+        next_parity_bit <= 1'b0;
     end else begin
         if (clken) begin
             case (state)
@@ -60,6 +59,11 @@ begin
                         next_state <= DATA;
                     next_bit_pos <= 5'b00000;
                     new_data <= 1'b0;
+                    frame_error <= 1'b0;
+                    if (parity_evan_odd)
+                        next_parity_bit <= 1'b1;
+                    else
+                        next_parity_bit <= 1'b0;
                 end
 
                 DATA: begin
@@ -70,13 +74,15 @@ begin
                             next_state <= STOP;
                     else
                         next_bit_pos <= bit_pos + 1;
-               
-                    probe <= 1'b1;
+
+                    next_parity_bit <= parity_bit ^ rx;
                     data_out[bit_pos] = rx;
                 end
 
                 PARITY: begin
-                    //will be soon when basic uart will be ready
+                    if (rx == parity_bit)
+                        frame_error =| 1;
+                    next_state <= STOP;
                 end
 
                 STOP: begin
@@ -109,9 +115,11 @@ begin
     if (rst) begin
         bit_pos <= 3'b000;
         state <= IDLE;
+        parity_bit <= 1'b0;
     end else begin
         bit_pos <= next_bit_pos;
         state <= next_state;
+        parity_bit <= next_parity_bit;
     end
 end
 

@@ -158,7 +158,6 @@ uart_rx uart1_rx (
     .parity_en(mem[4][3]),
     .parity_evan_odd(mem[4][4]),
     .two_stop_bit(mem[4][5]),
-    .probe(pmod1[4]),
 );
 
 endmodule

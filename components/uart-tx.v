@@ -21,13 +21,17 @@ localparam END       = 3'b111;
 
 reg [15:0] data;
 reg [4:0]  bit_pos;
-reg [3:0]  state;
-reg        tx;
+reg [2:0]  state;
+reg        tx = 1'b1;
 reg        new_data;
 reg [15:0] counter;
 reg        clken;
 reg [2:0]  stop_counter;
 reg        parity_bit;
+
+reg [2:0]  next_state;
+reg        next_parity_bit;
+reg [4:0]  next_bit_pos;
 
 assign busy = (state != IDLE) ? 1'b1 : 1'b0;
 
@@ -49,21 +53,21 @@ end
 
 always @(posedge clk) begin
     if (rst) begin
-        state <= IDLE;
-        bit_pos <= 5'b00000;
+        next_state <= IDLE;
+        next_bit_pos <= 5'b00000;
         tx <= 1'b1;
     end else begin
         case (state)
             IDLE: begin
                 if (wr_en) begin
-                    state <= VER_START;
-                    bit_pos <= 5'h0;
+                    next_state <= VER_START;
+                    next_bit_pos <= 5'h0;
                 end
             end
 
             VER_START: begin
                 if (wr_en == 1'b0) begin
-                    state <= START;
+                    next_state <= START;
                 end
             end
 
@@ -71,11 +75,11 @@ always @(posedge clk) begin
                 if (clken) begin
                     data <= data_in;
                     tx <= 1'b0;
-                    state <= DATA;
+                    next_state <= DATA;
                     if (parity_evan_odd)
-                        parity_bit <= 1'b0;
+                        next_parity_bit <= 1'b1;
                     else
-                        parity_bit <= 1'b1;
+                        next_parity_bit <= 1'b0;
                 end
             end
 
@@ -83,21 +87,20 @@ always @(posedge clk) begin
                 if (clken) begin
                     if (bit_pos == bits_per_word)
                         if (parity_en)
-                            state <= PARITY;
+                            next_state <= PARITY;
                         else
-                            state <= STOP;
+                            next_state <= STOP;
                     else
-                        bit_pos <= bit_pos + 3'h1;
-
+                        next_bit_pos <= bit_pos + 3'h1;
+                    next_parity_bit <= parity_bit ^ data[bit_pos];
                     tx <= data[bit_pos];
-                    parity_bit <= parity_bit ^ data[bit_pos];
                 end
             end
 
             PARITY: begin
                 if (clken) begin
                     tx <= parity_bit;
-                    state <= STOP;
+                    next_state <= STOP;
                 end
             end
 
@@ -106,27 +109,40 @@ always @(posedge clk) begin
                     tx <= 1'b1;
 
                     if (two_stop_bit)
-                        state <= STOP2;
+                        next_state <= STOP2;
                     else
-                        state <= END;
+                        next_state <= END;
                 end
             end
 
             STOP2: begin
                 if (clken)
-                    state <= END;
+                    next_state <= END;
             end
 
             END: begin
                 if (clken) 
-                    state <= IDLE;
+                    next_state <= IDLE;
             end
 
             default: begin
                 tx <= 1'b1;
-                state <= IDLE;
+                next_state <= IDLE;
             end
         endcase
+    end
+end
+
+always @ (posedge clk)
+begin
+    if (rst) begin
+        bit_pos <= 3'b000;
+        state <= IDLE;
+        parity_bit <= 0;
+    end else begin
+        bit_pos <= next_bit_pos;
+        state <= next_state;
+        parity_bit <= next_parity_bit;
     end
 end
 
