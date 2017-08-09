@@ -1,6 +1,6 @@
 #include "bw_bridge.h"
 
-int bw_init(struct bridge *br, uint32_t mem_address, uint32_t mem_size) {
+int bridge_init(struct bridge *br, uint32_t mem_address, uint32_t mem_size) {
 	uint32_t page_mask;
 	uint32_t page_size;
 
@@ -28,22 +28,22 @@ int bw_init(struct bridge *br, uint32_t mem_address, uint32_t mem_size) {
 	return 0;
 }
 
-void bw_close(struct bridge *br) {
+void bridge_close(struct bridge *br) {
 	if (munmap(br->mem_pointer, br->alloc_mem_size) == -1)
 		perror("Error un-mmapping the file");
 
 	close(br->mem_dev);
 }
 
-uint16_t bw_get_word(struct bridge *br, uint16_t reg_addr) {
+uint16_t get_word(struct bridge *br, uint16_t reg_addr) {
 	return *(uint16_t *)(br->virt_addr + reg_addr);
 }
 
-void bw_set_word(struct bridge *br, uint16_t reg_addr, uint16_t word) {
+void set_word(struct bridge *br, uint16_t reg_addr, uint16_t word) {
 	*(uint16_t *)(br->virt_addr + reg_addr) = word;
 }
 
-void bw_set_fpga_mem(struct bridge *br, uint16_t reg_addr, const void* source,
+void set_fpga_mem(struct bridge *br, uint16_t reg_addr, const void* source,
 		     size_t reg_num) {
 	unsigned int c;
 	uint16_t *usrc = (uint16_t *)source;
@@ -51,7 +51,7 @@ void bw_set_fpga_mem(struct bridge *br, uint16_t reg_addr, const void* source,
 		*(uint16_t *)(br->virt_addr + reg_addr + c*2) = usrc[c];
 }
 
-void bw_get_fpga_mem(struct bridge *br, uint16_t reg_addr, void* destination,
+void get_fpga_mem(struct bridge *br, uint16_t reg_addr, void* destination,
 		     size_t reg_num) {
 	unsigned int c;
 	uint16_t *udst = (uint16_t *)destination;
