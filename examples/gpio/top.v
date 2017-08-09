@@ -70,24 +70,6 @@ gpmc_controller (
     .data_in(data_in),
 );
 
-/*
- * memory map
- * offset | name   16 bit data       |
- *--------+--------------------------+
- *    0   | direct register          |
- *    2   | direct register          |
- *    4   | direct regsiter          |
- *    6   | -----------------------  |
- *    8   | output register          |
- *    10  | output register          |
- *    12  | output register          |
- *    14  | -----------------------  |
- *    16  | input register           |
- *    18  | input register           |
- *    20  | input register           |
- *
- */
-
 assign dir[15:0] = mem[0];
 assign dir[31:16] = mem[1];
 assign dir[47:32] = mem[2];
