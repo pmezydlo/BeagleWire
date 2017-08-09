@@ -85,42 +85,8 @@ SB_PLL40_CORE #(
     .PLLOUTCORE(clk_20m)
 );
 
-/*
- * memory map
- * offset | name               |
- *--------+--------------------+
- *    0   | setup register     |
- *    2   | status register    |
- *    4   | tranceive register |
- *    8   | receive register   |
- *
- * setup register
- *   bit  |
- *--------+--------------------+
- *    0   |  reset controller  |
- *    1   |  send data         |
- *    2   |  cpol bit          |
- *    3   |  cpha bit          |
- *    4   |  cs   bit          |
- *   9-5  |  bits per word     |
- *  15-10 |  clock div         |
- *
- * status register
- *   bit  |
- *--------+-----------------------+
- *    0   |  busy                 |
- *    1   |  new data for receive |
- *
- * cs line register
- *  bit   |
- *--------+-----------------------+
- *  7-0   |    each bit is one cs |
- *        |    line               |
- */
-
 localparam MAX_DATA_WIDTH = 32;
 
-// set rest to 1
 initial begin
     mem[0][0] <= 1'b1;
 end

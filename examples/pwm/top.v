@@ -80,37 +80,22 @@ wire lock;
         .PLLOUTCORE(clk_200m)
     );
 
-   /*
-    * pwm memory map
-    *
-    * offset | destination
-    *    0   |  setup
-    *    2   |  period
-    *    6   |  duty cycle
-    *    10  |  --
-    */
+wire [31:0] period;
+wire [31:0] duty_cycle;
 
-wire en;
-wire polarity;
-wire [32:0] period;
-wire [32:0] duty_cycle;
-
-assign en = mem[0][0];
-assign polarity = mem[0][1];
 assign period[15:0] = mem[2];
 assign period[31:16] = mem[1];
-
 assign duty_cycle[15:0] = mem[4];
 assign duty_cycle[31:16] = mem[3];
 
 pwm pwm1 (
-    .en(en),
+    .rst(mem[0][0]),
+    .en(mem[0][1]),
     .period(period),
     .duty_cycle(duty_cycle),
-    .polarity(polarity),
+    .polarity(mem[0][2]),
     .clk(clk_200m),
     .out(pmod1[0]),
 );
-
 
 endmodule

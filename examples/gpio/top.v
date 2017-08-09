@@ -40,9 +40,9 @@ end
 always @ (posedge clk)
 begin
     if (!cs && we && !oe) begin
-        mem[6] <= Inputs[15:0];
-        mem[5] <= Inputs[31:16];
-        mem[4] <= Inputs[47:32];
+        mem[0] <= Inputs[15:0];
+        mem[9] <= Inputs[31:16];
+        mem[10] <= Inputs[47:32];
         data_in <= mem[addr];
     end else begin
         data_in <= 0;
@@ -88,12 +88,12 @@ gpmc_controller (
  *
  */
 
-assign dir[15:0] = mem[2];
+assign dir[15:0] = mem[0];
 assign dir[31:16] = mem[1];
-assign dir[47:32] = mem[0];
-assign Outputs[15:0] = mem[6];
+assign dir[47:32] = mem[2];
+assign Outputs[15:0] = mem[4];
 assign Outputs[31:16] = mem[5];
-assign Outputs[47:32] = mem[4];
+assign Outputs[47:32] = mem[6];
 
 gpio_port port1 (
     .io(pmod1),

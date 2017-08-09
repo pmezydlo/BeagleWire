@@ -47,6 +47,7 @@ dp_sync_ram #(
     .DATA_WIDTH(DATA_WIDTH),
     .ADDR_WIDTH(ADDR_WIDTH))
 dual_port_ram (
+    .rst(1'b0),
     .clk(clk),
     .cs_0(cs),
     .we_0(we),
