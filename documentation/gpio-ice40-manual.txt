@@ -6,10 +6,9 @@ Features:
   - easy to implement
 
 Introduction:
-Ten projekt pozwala na korzystanie z pinow FPGA (iCE40) on BeagleWire board from Userspace on linux on ARM. 
-Projekt sklada sie z kontrolera GPIO i komponentu mapujacego. Do Kazdego kontrolera GPIO mozemy podlaczyc 8
-pinow I/O. Do dyskozycji jest 48 pinow I/O. 
-
+This project allows to use FPGA (iCE40) pins on BeagleWire board from the level of userspace on linux on ARM.
+The projects consists of a GPIO controller and a mapping component. Eight pins can be connected to each GPIO 
+controller. There are a total of 48 pins I/O. 
 
   +-----------+     +------------------------------------------------------------------+
   |  ARM      |     |    FPGA iCE40                          +------------+            |
@@ -37,18 +36,16 @@ pinow I/O. Do dyskozycji jest 48 pinow I/O.
 Background:
 
 About GPMC:
-Rejestry kontrolerow GPIO sa mapowane w pamieci ARM przy uzyciu GPMC bus. 
-Wiecej informacji na temap mapowania logiki mozna znalezc w gpmc-ice40-manual.txt.
+Registers of GPIO controllers are mapped in ARM memory using GPMC bus. More information regarding logic mapping can be found at gpmc-ice40-manual.txt.
 
 Direct register:
-rejestr sluzy do ustawienia kierunku GPIO. Kazdy pin moze byc input (0) lub output (1).
+It is used to set GPIO direction. Each pin can be either input (0) or output (1).
 
 Output register:
-rejestr sluzy do ustawienia stanu na wyjsciu. Pin musi znajdowac sie w trybie out enabale. (dir set to 1).
+It is used to set the state on output. The pin has to be on out enable mode (dir set to 1).
 
 Input register:
-rejestr sluzy do czyania stanu na wejsciu. Pin musi znajdowac sie w trybie output disabled (dir set to 0).
-
+It is used to read the state on input. The pin has to be on output disabled mode (dir set to 0).
 
 BeagleWire Pins Alignment:
 

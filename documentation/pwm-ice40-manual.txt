@@ -14,6 +14,10 @@ w verilogu. Projekt zostal stworzony przy uzyciu IceStorm toolchains. Kontroler 
 w pamieci ARM korzystajac z GPMC bus dzieki temu po podlaczeniu Linux driver lub prostej applikacji
 mozna sterowac, czestotliwoscia, wypenieniem i polaryzacja sygnalu PWM.
 
+The project provides a complete PWM (Pulse Width Modulation) module written in verilog, which is 
+intended for use with FPGAs. It has been created with the use of IceStorm toolchains. 
+
+
   +-----------+     +------------------------------------------------------+
   |  ARM      |     |    FPGA iCE40                                        |
   |          -------->                                                     |           
