@@ -1,0 +1,15 @@
+iCE40 PWM FPGA controller
+
+Required properties:
+  - compatible: should be:
+    - "beagle,ice40-pwm"
+  - reg: physical base address and length of the controller's registers
+  - #pwm-cells: Should be 3. See pwm.txt in this directory for a
+    description of the cells format.
+
+Examples:
+        pwm-ice40: pwm@1000000 {
+		compatible = "beagle,ice40-pwm";
+		reg = <0x1000000 0x2000>;
+		#pwm-cells = <>;
+	}

@@ -1,0 +1,163 @@
+SPI (Verilog)
+
+Features:
+  - Verilog source code of a Serial Peripheral Interface (SPI) master component
+  - Configurable data width
+  - Configurable speed
+  - Selectable clock polarity and clock phase
+
+Introduction:
+Ten projekt dostarcza gotowy kontroler SPI Master przeznaczony dla FPGAs napisany w Verilogu. 
+Projekt jest tworzony przy uzyciu IceStrom Toolchain. Projekt zawiera kontroler SPI master oraz
+komponent GPMC, dzięki temu kontroler SPI jest mapowany w pamieci ARM, mozesz korzystac z tego 
+kontrolera jak z kazdego innego kontrolera umieszczonego w krzemie twojego processora.
+
+  +-----------+     +-------------------------------------------------------------------------+
+  |  arm      |     |    fpga ice40                                                           |
+  |          -------->                                +-------------------+                   |
+  | memory    gpmc                             +----->|                   |                   |
+  |          <--------    fpga registers       |+-----|    SPI MASTER   -------------------------> SCLK
+  |           |     |     are mapped in arm    ||     |    COMPONENT      |                   |
+  |           |     |     +-----------------+  ||     |                 -------------------------> MOSI
+  +-----------+     |     | setup register  |--+|     |                   |                   |
+                    |     | status register |<--+     |                 <------------------------- MISO
+                    |     | tx data register|-------->|                   |                   |
+                    |     | rx data register|<--------|                   |                   |
+                    |     | clk div register|-+       +-------------------+                   |
+                    | +---| cs register     | |                         ^                     |
+                    | |   +-----------------+ |                         |                     |
+                    | |                       |                         |                     |
+                    | |                       |        +-------------+  |                     |
+                    | |                       +------->|clock divider|--+                     |
+                    | |                                +-------------+                        |
+                    | |                                                                       |
+                    | +---------------------------------------------------------------------------> CS
+                    |                                                                         |
+                    +-------------------------------------------------------------------------+
+
+Background:
+
+About SPI:
+The Serial Peripheral Interface bus (SPI) is a synchronous serial communication interface.
+An SPI communication is a full-duplex, using four wires. 
+
+About GPMC:
+Rejestry kontrolera spi sa mapowane w pamieci ARM przy uzyciu GPMC bus. 
+Wiecej informacji na temap mapowania logiki mozna znalezc w ())()())..txt.
+
+Reset:
+Reset jest asynchroniczny i aktywny po właczeniu układu. Reset nalezy 
+wylaczyc ustawiajac bit na pierwszej pozcyji w rejestrze ustawien (0x00) (setting register).
+
+Clock:
+Kontroler posiada dzielnik czestotliwosci. Wartosc dzielnika mozesz zmienic w kazdej chwili. Wartosc dzielnika
+umieszczona jest w rejestrze ustawien na pozycji (15-10). 
+zrodlo zegara dla SPI wynosi 20Mhz. Ustawiajac dzielnik na 2 otrzymasz 10Mhz itd.
+
+Bits per word:
+Kontroler wspiera rozne dlugosc slowa od 2 do 32 bitow. Na starcie kazdej transakcjii liczba
+bitow jest zatrzaskiwana. Od liczby bitow nalzy odjac 1 i wpisac do rejestru ustawien na pozycje (9:5)
+
+Polarity and Phase:
+The enable pin latches in the standard logic values of cpol and cpha at the start of each transaction.
+This allows communication with individual slaves using independent SPI modes. If all slaves require 
+the same mode, cpol and cpha can simply be tied to the corresponding logic levels.
+
+Transactions:
+	1. Ustawic ustawienia dotyczace transakcji.
+	2. Zaladowac dane do buffora wysylajacego (0x4).
+	3. Ustawic start bit
+	4. Wyczyscic bit startu (w tej chwili slowo jest wysylane)  
+	5. Czekac az bit new_data zostanie ustawiony.
+	6. Dane sa gotowe do odbioru.
+	7. Powrot do punktu 2
+
+Memory map:
+
+ Offset   | Register name                       |
+----------+-------------------------------------+
+    0x0   | setup register                      |
+----------+-------------------------------------+
+    0x2   | status register                     |
+----------+-------------------------------------+
+    0x4   | tranceive register                  |
+----------+-------------------------------------+
+    0x8   | receive register                    |
+----------+-------------------------------------+
+
+Setup register (0x00)
+
+   bit  | default |      | destination          |
+--------+---------+------+----------------------+
+    0   |    0    |  R/W | Reset controller     |
+--------+---------+------+----------------------+
+    1   |    0    |  R/W | Start sending data   |
+--------+---------+------+----------------------+
+    2   |    0    |  R/W | Cpol setting bit     |
+--------+---------+------+----------------------+
+    3   |    0    |  R/W | Cpha setting bit     |
+--------+---------+------+----------------------+
+    4   |    0    |  R/W | Chip select (CS) bit |
+--------+---------+------+----------------------+
+   9-5  |    0    |  R/W | Bits per word        |
+--------+---------+-----------------------------+
+  15-10 |    0    |  R/W | Clock divider        |
+--------+---------+------+----------------------+
+
+Status register (0x02)
+
+   bit  | default |      | destination          |
+--------+---------+------+----------------------+
+    0   |    0    |  RO  | Busy                 |
+--------+---------------------------------------+
+    1   |    0    |  RO  | New data for receive |
+--------+---------+------+----------------------+
+
+Tranceive data register (0x04)
+   bit  | default |      | destination          |
+--------+---------+------+----------------------+
+  31-0  |    0    |  R/W | Data to tranceive    |
+--------+---------+------+----------------------+
+
+Receive data register (0x08)
+   bit  | default |      | destination          |
+--------+---------+------+----------------------+
+  31-0  |    0    |  R/W | Data to receive      |
+--------+---------+------+----------------------+
+
+SPI Component Port Descriptions:
+
+   Port        | Width | Mode | Interface    | Description                                 |
+---------------+-------+------+--------------+---------------------------------------------+
+  clk          |   1   |  IN  | User logic   | System clock                                |
+---------------+-------+------+--------------+---------------------------------------------+
+  rst          |   1   |  IN  | User logic   | Asynchronous active low reset               |
+---------------+-------+------+--------------+---------------------------------------------+
+  sck          |   1   |  BUF | Slave device | SPI clock                                   |
+---------------+-------+------+--------------+---------------------------------------------+
+  miso         |   1   |  IN  | Slave device | Master in, slave out data line              |
+---------------+-------+------+--------------+---------------------------------------------+
+  mosi         |   1   |  OUT | Slave device | Master out, slave in data line              |
+---------------+-------+------+--------------+---------------------------------------------+
+  cpol         |   1   |  IN  | User logic   | SPI clock polarity setting                  |
+---------------+-------+------+--------------+---------------------------------------------+
+  cpha         |   1   |  IN  | User logic   | SPI clock phase setting                     |
+---------------+-------+------+--------------+---------------------------------------------+
+  bits_per_word|   5   |  IN  | User logic   | Numer of bits per word                      |
+---------------+-------+------+--------------+---------------------------------------------+
+  div          |   6   |  IN  | User logic   | Clock divider                               |
+---------------+-------+------+--------------+---------------------------------------------+
+  data_in      |   32  |  IN  | User logic   | Data to transmit                            |
+---------------+-------+------+--------------+---------------------------------------------+
+  data_out     |   32  |  OUT | User logic   | Data received from target slave             |
+---------------+-------+------+--------------+---------------------------------------------+
+  busy         |   1   |  OUT | User logic   | Busy signal                                 |
+---------------+-------+------+--------------+---------------------------------------------+
+  start        |   1   |  IN  | User logic   | Start sequence signal,                      |
+               |       |      |              |set to 1 and then to 0 to enable transaction |
+---------------+-------+------+--------------+---------------------------------------------+
+  new_data     |   1   |  OUT | User logic   | Data ready signal                           |
+---------------+-------+------+--------------+---------------------------------------------+
+
+Component owners:
+Patryk Mezydlo <mezydlo.p@gmail.com>

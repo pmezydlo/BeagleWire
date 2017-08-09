@@ -1,0 +1,110 @@
+PWM (verilog)
+
+Features:
+  - Verilog source code of a PWM generator component
+  - Configurable duty cycle resolution
+  - Configurable number of outputs/phases
+  - Configurable PWM frequency
+  - Modulation around the center of the pulse
+  - Configurable signal polarity
+
+Introduction:
+Projekt dostarcza kompletny modul PWM (Pulse Width Modulation) do uzycia z FPGas napisany
+w verilogu. Projekt zostal stworzony przy uzyciu IceStorm toolchains. Kontroler jest mapowany
+w pamieci ARM korzystajac z GPMC bus dzieki temu po podlaczeniu Linux driver lub prostej applikacji
+mozna sterowac, czestotliwoscia, wypenieniem i polaryzacja sygnalu PWM.
+
+  +-----------+     +------------------------------------------------------+
+  |  ARM      |     |    FPGA iCE40                                        |
+  |          -------->                                                     |           
+  | memory    GPMC                                                         |
+  |          <--------      fpga registers                                 |
+  |           |     |       are mapped in arm                              |
+  |           |     |       +-----------------+       +----------------+   |
+  +-----------+     |       | Setup           |------>|  PWM component |   |
+                    |       | Period          |------>|                |   |
+                    |       | Duty Cycle      |------>|                |   |
+                    |       +-----------------+       |                |-------> PWM pins
+                    |                                 |                |   |
+                    |       +--------------+          |                |   |
+                    |       | PLL   200MHz |--------->|                |   |
+                    |       +--------------+          +----------------+   |          
+                    |                                                      |
+                    +------------------------------------------------------+
+
+Duty Cycle:
+W tym rejestrze ustawia sie wypenienie sygnalu w nano seconds:
+PWM_duty_counter = Duty_ns / Clock_period (200MHz = 20ns)
+
+Period:
+Rejestr sluzy do ustawienia czestotliwosci sygnalu PWM. Nalezy obliczyc wartosc licznika:
+PWM_counter = Period_ns / Clock_period (200MHz = 20ns).
+ 
+Clock:
+Zrodlo zegara dla controllera PWM wynosi 200MHz. Dzieki temu generowany sygnal jest
+dokladniejszy. 
+
+Enable:
+Ustawienie tego bitu powoduje aktywacje generowania sygnalu PWM.
+
+Reset:
+Reset jest asynchroniczny i aktywny po właczeniu układu. Reset nalezy 
+wylaczyc ustawiajac bit na pierwszej pozcyji w rejestrze ustawien (0x00) (Setup register).
+
+Polarity:
+Ustawienie bitu polarity (pozycja 3) powoduje inwersje sygnalu PWM.
+
+
+Memory map:
+
+ offset    | register name                                                             |
+-----------+---------------------------------------------------------------------------+
+    0x00   | Setup register                                                            |
+-----------+---------------------------------------------------------------------------+
+    0x02   | Period register                                                           |
+-----------+---------------------------------------------------------------------------+
+    0x06   | Duty Cycle register                                                       |
+-----------+---------------------------------------------------------------------------+
+
+Setup register (0x00)
+
+   bit  | default |      | destination                             |
+--------+---------+------+-----------------------------------------+
+    0   |    0    |  R/W | Reset bit                               |
+--------+---------+------+-----------------------------------------+
+    1   |    0    |  R/W | Enable bit                              |
+--------+---------+------+-----------------------------------------+
+    2   |    0    |  R/W | Polarity bit                            |
+--------+---------+------+-----------------------------------------+
+
+Period register (0x08)
+   bit  | default |      | destination          |
+--------+---------+------+----------------------+
+  31-0  |  Output |  R/W | Period register      |
+--------+---------+------+----------------------+
+
+Duty Cycle register (0x04)
+   bit  | default |      | destination          |
+--------+---------+------+----------------------+
+  31-0  |    0    |  RO  | Duty Cycle register  |
+--------+---------+------+----------------------+
+
+PWM Component Port Descriptions:
+
+  Port         | Width | Mode | Interface    | Description                                 |
+---------------+-------+------+--------------+---------------------------------------------+
+  en           |   1   |  IN  | User logic   | Enable bit (0 PWM controller is active)     |
+---------------+-------+------+--------------+---------------------------------------------+
+  period       |   3   |  IN  | User logic   | Period                                      |
+---------------+-------+------+--------------+---------------------------------------------+
+  duty_cycle   |   8   |  IN  | User logic   | Duty Cycle                                  |
+---------------+-------+------+--------------+---------------------------------------------+
+  polarity     |   8   |  IN  | User logic   | Polarity                                    |
+---------------+-------+------+--------------+---------------------------------------------+
+  clk          |   8   |  IN  | User logic   | Clock source                                |
+---------------+-------+------+--------------+---------------------------------------------+
+  out          |   8   |  OUT | Load         | Output PWM signals                          |
+---------------+-------+------+--------------+---------------------------------------------+
+
+Component owners:
+Patryk Mezydlo <mezydlo.p@gmail.com>

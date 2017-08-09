@@ -1,0 +1,84 @@
+GPMC (Verilog)
+
+Features:
+
+
+Introduction:
+GPMC komponent dostarcza prosty do implementacji sposob na wymiane danych z processorem ARM.
+W prosty sposob mozna mapowac swoja logike w pamieci processora. Jest to mozliwe dzieki temu ze 
+na plytkach beagleboard wyprowadzono piny GPMC bus na zewnatrz. Plytka beagleWire zostala tak zaprojektowana
+by z tego korzystac. Szerokosc magistrali wynosi az 16 linii a czestotliwosc zegara wynosi 25MHz pozwala to 
+na bardzo efektywna wymiane danych. Kontroler GPMC jest konfigurowany z pliku DTS, zawarte sa tam informacje 
+na temat ustawien czasowych, sposobu przesylu danych oraz ustawienia polozenia mappowanej pamieci. 
+W tym manualu opisany jest sposob korzystania z wspoldzielnej pamieci na FPGA. Modul zostal napisany w verilogu
+przy uzyciu IceStrom Toolchains. 
+
+
+  +-----------+     +-------------------------------------------------------------------------+
+  |  ARM      |     |    FPGA iCE40                                                           |
+  |          <------->        
+  | memory   GPMC Data      
+  |          <--------   
+  |           |     |   
+  |           |     |   
+  +-----------+     | 
+                    |     
+                    |   
+                    |  
+                    |
+                    |
+                    | 
+                    | 
+                    |
+                    |
+                    |
+                    |
+                    |
+                    |                                                                         
+                    +-------------------------------------------------------------------------+
+
+Background:
+
+About GPMC:
+Rejestry kontrolera spi sa mapowane w pamieci ARM przy uzyciu GPMC bus. 
+Wiecej informacji na temap mapowania logiki mozna znalezc w ())()())..txt.
+
+
+
+
+GPMC Component Port Descriptions:
+
+   Port        | Width | Mode | Interface    | Description                                 |
+---------------+-------+------+--------------+---------------------------------------------+
+  clk          |   1   |  IN  | User logic   | System clock                                |
+---------------+-------+------+--------------+---------------------------------------------+
+  rst          |   1   |  IN  | User logic   | Asynchronous active low reset               |
+---------------+-------+------+--------------+---------------------------------------------+
+  sck          |   1   |  BUF | Slave device | SPI clock                                   |
+---------------+-------+------+--------------+---------------------------------------------+
+  miso         |   1   |  IN  | Slave device | Master in, slave out data line              |
+---------------+-------+------+--------------+---------------------------------------------+
+  mosi         |   1   |  OUT | Slave device | Master out, slave in data line              |
+---------------+-------+------+--------------+---------------------------------------------+
+  cpol         |   1   |  IN  | User logic   | SPI clock polarity setting                  |
+---------------+-------+------+--------------+---------------------------------------------+
+  cpha         |   1   |  IN  | User logic   | SPI clock phase setting                     |
+---------------+-------+------+--------------+---------------------------------------------+
+  bits_per_word|   5   |  IN  | User logic   | Numer of bits per word                      |
+---------------+-------+------+--------------+---------------------------------------------+
+  div          |   6   |  IN  | User logic   | Clock divider                               |
+---------------+-------+------+--------------+---------------------------------------------+
+  data_in      |   32  |  IN  | User logic   | Data to transmit                            |
+---------------+-------+------+--------------+---------------------------------------------+
+  data_out     |   32  |  OUT | User logic   | Data received from target slave             |
+---------------+-------+------+--------------+---------------------------------------------+
+  busy         |   1   |  OUT | User logic   | Busy signal                                 |
+---------------+-------+------+--------------+---------------------------------------------+
+  start        |   1   |  IN  | User logic   | Start sequence signal,                      |
+               |       |      |              |set to 1 and then to 0 to enable transaction |
+---------------+-------+------+--------------+---------------------------------------------+
+  new_data     |   1   |  OUT | User logic   | Data ready signal                           |
+---------------+-------+------+--------------+---------------------------------------------+
+
+Component owners:
+Patryk Mezydlo <mezydlo.p@gmail.com>
