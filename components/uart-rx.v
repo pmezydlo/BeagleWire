@@ -29,7 +29,7 @@ reg [15:0] data_out;
 reg        parity_bit;
 reg        next_parity_bit;
 
-always @(posedge clk)
+always @(posedge clk or posedge rst)
 begin
     if (rst) begin
         clken <= 0;
@@ -45,7 +45,7 @@ begin
     end
 end
 
-always @ (posedge clk)
+always @ (posedge clk or posedge rst)
 begin
     if (rst) begin
         next_state <= IDLE;
@@ -110,7 +110,7 @@ begin
     end
 end
 
-always @ (posedge clk)
+always @ (posedge clk or posedge rst)
 begin
     if (rst) begin
         bit_pos <= 3'b000;

@@ -35,7 +35,7 @@ reg [4:0]  next_bit_pos;
 
 assign busy = (state != IDLE) ? 1'b1 : 1'b0;
 
-always @(posedge clk)
+always @(posedge clk or posedge rst)
 begin
     if (rst) begin
         clken <= 0;
@@ -51,7 +51,7 @@ begin
     end
 end
 
-always @(posedge clk) begin
+always @(posedge clk or posedge rst) begin
     if (rst) begin
         next_state <= IDLE;
         next_bit_pos <= 5'b00000;
@@ -121,7 +121,7 @@ always @(posedge clk) begin
             end
 
             END: begin
-                if (clken) 
+                if (clken)
                     next_state <= IDLE;
             end
 
@@ -133,7 +133,7 @@ always @(posedge clk) begin
     end
 end
 
-always @ (posedge clk)
+always @ (posedge clk or posedge rst)
 begin
     if (rst) begin
         bit_pos <= 3'b000;

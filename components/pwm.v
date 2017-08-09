@@ -1,4 +1,5 @@
-module pwm (input                     en,
+module pwm (input                     rst,
+            input                     en,
             input [COUNTER_WIDTH-1:0] period,
             input [COUNTER_WIDTH-1:0] duty_cycle,
             input                     polarity,
@@ -16,22 +17,26 @@ end
 
 assign out = (polarity == 1'b0) ? out_pwm : !out_pwm;
 
-always @ (posedge clk)
+always @ (posedge clk or posedge rst)
 begin
-    if (en == 1'b0) begin
+    if (rst) begin
         out_pwm <= 1'b0;
+        count <= 0;
     end else begin
-
-        if (count < period) begin
-            count <= count + 1'b1;
+        if (en == 1'b0) begin
+            out_pwm <= 1'b0;
         end else begin
-            count <= 0;
-        end
+            if (count < period) begin
+                count <= count + 1'b1;
+            end else begin
+                count <= 0;
+            end
 
-        if (count < duty_cycle) begin
-            out_pwm <= 1;
-        end else begin
-            out_pwm <= 0;
+            if (count < duty_cycle) begin
+                out_pwm <= 1;
+            end else begin
+                out_pwm <= 0;
+            end
         end
     end
 end
