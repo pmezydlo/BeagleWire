@@ -6,6 +6,7 @@ FOOTPRNT = tq144:4k
 SRC = top.v
 SRC += ../../components/gpmc-sync.v
 SRC += ../../components/i2c-master.v
+SRC += ../../components/fifo.v
 PIN_SRC = pinmap.pcf
 
 .PHONY: all load clean

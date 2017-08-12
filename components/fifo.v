@@ -8,9 +8,9 @@ module fifo(input                       clk,
             output                      full,
             output [BUF_WIDTH:0]        counter);
 
-parameter BUF_WIDTH      = 5;
-parameter BUF_SIZE       = 1 << BUF_WIDTH; 
-parameter BUF_DATA_WIDTH = 16;
+parameter  BUF_WIDTH      = 5;
+parameter  BUF_DATA_WIDTH = 16;
+localparam BUF_SIZE       = 1 << BUF_WIDTH; 
         
 reg [BUF_DATA_WIDTH-1:0] out;
 reg                      empty;

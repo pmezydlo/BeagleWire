@@ -2,14 +2,14 @@ module i2c_master (input        clk,
                    input        rst,
                    inout        scl,
                    inout        sda,
-                   input        enable_in,
+                   input        enable,
                    input [6:0]  addr,
                    input        rw,
                    output       busy,
                    output       ack_error,
                    output [7:0] data_rd,
                    input [7:0]  data_wr,
-
+                   output       fifo_tx,
                    output [5:0] debug,
                );
 
@@ -18,7 +18,6 @@ parameter CLK_FREQ = 100_000_000;
 localparam DIVIDER = (CLK_FREQ/BUS_CLK)/4;
 
 localparam IDLE      = 4'b0000;
-localparam VER_START = 4'b1001;
 localparam START     = 4'b0001;
 localparam COMMAND   = 4'b0010;
 localparam SLV_ACK1  = 4'b0011;
@@ -29,16 +28,7 @@ localparam MSTR_ACK  = 4'b0111;
 localparam STOP      = 4'b1000;
 
 reg [3:0] state = IDLE;
-
-reg enable_d;
-reg enable;
-
-always @ (posedge clk)
-begin
-    enable_d <= enable_in;
-    enable = (enable_in && !enable_d);
-end
-
+reg fifo_tx;
 reg stretch;
 reg [9:0] count;
 reg ack_error;
@@ -91,64 +81,49 @@ begin
 end
 
 assign debug[0] = data_clk;
+assign debug[1] = enable;
+assign debug[2] = fifo_tx;
 
 always @ (posedge clk or posedge rst)
 begin
     if (rst) begin
-        busy <= 1'b1;
+        busy <= 1'b0;
         scl_enable <= 1'b0;
         sda_int <= 1'b1;
         ack_error <= 1'b0;
-        bit_cnt <= 7;
+        bit_cnt <= 4'h7;
         state <= IDLE;
+        data_rd <= 8'b00000000;
     end else begin
         if (data_clk == 1'b1 && data_clk_prev == 1'b0) begin
             case (state)
                 IDLE: begin
                     if (enable == 1'b1) begin
                         busy <= 1'b1;
-                        addr_rw <= addr & rw;
-                        data_tx <= data_wr;
+                        addr_rw <= {addr, rw};
                         state <= START;
                     end else begin
                         busy <= 1'b0;
                         state <= IDLE;
                     end
                 end
-
+                
                 START: begin
                     busy <= 1'b1;
-                    sda_int <= addr_rw[bit_cnt-1];
+                    sda_int <= addr_rw[bit_cnt];
                     state <= COMMAND;
                 end
 
                 COMMAND: begin
                     if (bit_cnt == 4'b0000) begin
                         sda_int <= 1'b1;
-                        bit_cnt <= 7;
-                        state <= SLV_ACK1;
-                    end else begin
-                        bit_cnt <= bit_cnt - 1;
-                        sda_int <= addr_rw[bit_cnt-1];
-                        state <= WR;
-                    end
-                end
-
-                START: begin
-                    busy <= 1'b1;
-                    sda_int <= addr_rw[bit_cnt-1];
-                    state <= COMMAND;
-                end
-
-                COMMAND: begin
-                    if (bit_cnt == 4'b0000) begin
-                        sda_int <= 1'b1;
-                        bit_cnt <= 7;
+                        bit_cnt <= 4'h7;
                         state<= SLV_ACK1;
+                        fifo_tx <= 1'b1;
                     end else begin
                         bit_cnt <= bit_cnt - 1;
                         sda_int <= addr_rw[bit_cnt-1];
-                        state <= WR;
+                        state <= COMMAND;
                     end
                 end
 
@@ -156,6 +131,8 @@ begin
                     if (addr_rw[0] == 1'b0) begin
                         sda_int <= data_tx[bit_cnt];
                         state <= WR;
+                        data_tx <= data_wr;
+                        fifo_tx <= 1'b0;
                     end else begin
                         sda_int <= 1'b1;
                         state <= RD;
@@ -168,9 +145,10 @@ begin
                         sda_int <= 1'b1;
                         bit_cnt <= 4'h7;
                         state <= SLV_ACK2;
+                        fifo_tx <= 1'b1;
                     end else begin
                         bit_cnt <= bit_cnt - 1;
-                        sda_int <= data_rx[bit_cnt-1];
+                        sda_int <= data_tx[bit_cnt-1];
                         state <= WR;
                     end
                 end
@@ -178,7 +156,7 @@ begin
                 RD: begin
                     busy <= 1'b1;
                     if (bit_cnt == 4'b0000) begin
-                        if (enable == 1'b1 && addr_rw == addr && rw)
+                        if (enable == 1'b1 && addr_rw == {addr, rw})
                             sda_int <= 1'b0;
                         else
                             sda_int <= 1'b1;
@@ -194,9 +172,10 @@ begin
                 SLV_ACK2: begin
                     if (enable == 1'b1) begin
                         busy <= 1'b0;
-                        addr_rw <= addr & rw;
+                        addr_rw <= {addr, rw};
                         data_tx <= data_wr;
-                        if (addr_rw == addr & rw) begin
+                        fifo_tx <= 1'b0;
+                        if (addr_rw == {addr, rw}) begin
                             sda_int <= data_wr[bit_cnt];
                             state <= WR;
                         end else begin
@@ -210,9 +189,9 @@ begin
                 MSTR_ACK: begin
                     if (enable == 1'b1) begin
                         busy <= 1'b0;
-                        addr_rw <= addr & rw;
+                        addr_rw <= {addr, rw};
                         data_tx <= data_wr;
-                        if (addr_rw == addr & rw) begin
+                        if (addr_rw == {addr, rw}) begin
                             sda_int <= 1'b1;
                             state <= RD;
                         end else begin
@@ -222,6 +201,13 @@ begin
                         state <= STOP;
                     end
                 end
+
+                STOP: begin
+                    busy <= 1'b0;
+                    state <= IDLE;
+                    fifo_tx <= 1'b0;
+                end
+
             endcase
         end else if (data_clk == 1'b0 && data_clk_prev == 1'b1) begin
             case (state)
@@ -247,7 +233,7 @@ begin
                 end
 
                 STOP: begin
-                    scl_enable <= 1'b1;
+                    scl_enable <= 1'b0;
                 end
             endcase
         end
@@ -274,7 +260,7 @@ SB_IO # (
     .PULLUP(1'b0)
 ) sda_io (
     .PACKAGE_PIN(sda),
-    .OUTPUT_ENABLE(sda_enable == 1'b1),
+    .OUTPUT_ENABLE(sda_enable == 1'b0),
     .D_OUT_0(1'b0),
     .D_IN_0(sda_in),
 );

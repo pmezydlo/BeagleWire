@@ -29,14 +29,15 @@ always @ (posedge clk)
 begin
     if (!cs && !we && oe) begin
         mem[addr] <= data_out;
-
     end
 end
 
 always @ (posedge clk)
 begin
     if (!cs && we && !oe) begin
-        mem[1][7:0] <= data_read;
+        mem[1][1] <= tx_fifo_empty;
+        mem[1][2] <= tx_fifo_full;
+        mem[1][8:3] <= tx_fifo_counter;
         data_in <= mem[addr];
     end else begin
         data_in <= 0;
@@ -68,7 +69,14 @@ initial begin
     mem[0][0] <= 1'b1;
 end
 
-reg [7:0] data_read;
+reg [7:0] data_write;
+wire tx_fifo_empty;
+wire tx_fifo_full;
+wire [5:0] tx_fifo_counter;
+wire fifo_tx_new_data;
+
+wire en;
+assign en = (mem[0][1] && !tx_fifo_empty) ? 1'b1 : 1'b0;
 
 i2c_master i2c1 (
     .clk(clk),
@@ -77,15 +85,30 @@ i2c_master i2c1 (
     .scl(scl),
     .sda(sda),
     
-    .enable_in(mem[0][1]),
-    .addr(7'h28),
+    .enable(en),
+    .addr(7'h50),
     .rw(1'b0),
     .busy(pmod2[0]),
     .ack_error(pmod2[1]),
-    .data_rd(data_read),
-    .data_wr(8'b11001111),
+    .data_rd(),
+    .data_wr(data_write),
+    .fifo_tx(fifo_tx_new_data),
     .debug(pmod2[2:7]),
 );
+
+fifo #(5, 8)
+tx_fifo (
+    .clk(clk),
+    .rst(mem[0][0]),
+    .in(mem[2][7:0]),
+    .out(data_write),
+    .wr_en_in(mem[1][0]),
+    .rd_en_in(fifo_tx_new_data),
+    .empty(tx_fifo_empty),
+    .full(tx_fifo_full),
+    .counter(tx_fifo_counter),
+);
+
 
 assign led[0] = mem[0][0];
 assign led[1] = mem[0][1];
