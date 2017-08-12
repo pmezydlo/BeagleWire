@@ -1,19 +1,47 @@
-module i2c_master (input clk,
-                   input rst,
-               
-                   inout scl,
-                   inout sda,
-               
-                   input scl_enable);
+module i2c_master (input        clk,
+                   input        rst,
+                   inout        scl,
+                   inout        sda,
+                   input        enable_in,
+                   input [6:0]  addr,
+                   input        rw,
+                   output       busy,
+                   output       ack_error,
+                   output [7:0] data_rd,
+                   input [7:0]  data_wr,
 
+                   output [5:0] debug,
+               );
 
 parameter BUS_CLK = 400_000;
 parameter CLK_FREQ = 100_000_000;
 localparam DIVIDER = (CLK_FREQ/BUS_CLK)/4;
 
-reg streach;
-reg [9:0] count;
+localparam IDLE      = 4'b0000;
+localparam VER_START = 4'b1001;
+localparam START     = 4'b0001;
+localparam COMMAND   = 4'b0010;
+localparam SLV_ACK1  = 4'b0011;
+localparam WR        = 4'b0100;
+localparam RD        = 4'b0101;
+localparam SLV_ACK2  = 4'b0110;
+localparam MSTR_ACK  = 4'b0111;
+localparam STOP      = 4'b1000;
 
+reg [3:0] state = IDLE;
+
+reg enable_d;
+reg enable;
+
+always @ (posedge clk)
+begin
+    enable_d <= enable_in;
+    enable = (enable_in && !enable_d);
+end
+
+reg stretch;
+reg [9:0] count;
+reg ack_error;
 reg data_clk;
 reg data_clk_prev;
 wire scl_in;
@@ -21,33 +49,39 @@ reg scl_clk;
 reg scl_enable;
 wire sda_in;
 reg sda_enable;
+reg sda_int = 1'b1;
+reg [7:0] data_rx;
+reg [3:0] bit_cnt = 4'h7;
+reg [7:0] data_tx;
+reg [7:0] addr_rw;
+
 
 always @ (posedge clk or posedge rst)
 begin
     if (rst) begin
-        streach <= 0;
+        stretch <= 0;
         count <= 0;
     end else begin
         data_clk_prev <= data_clk;
 
         if (count == DIVIDER*4-1) begin
             count <= 0;
-        end else begin
+        end else if (stretch == 1'b0) begin
             count <= count + 1;
         end
 
-        if (count > 0 && count < DIVIDER-1) begin
+        if (count > 0 && count <= DIVIDER-1) begin
             scl_clk <= 1'b0;
             data_clk <= 1'b0;
-        end else if (count > DIVIDER && count < DIVIDER*2-1) begin
+        end else if (count >= DIVIDER && count <= DIVIDER*2-1) begin
             scl_clk <= 1'b0;
             data_clk <= 1'b1;
-        end else if (count > DIVIDER*2 && count < DIVIDER*3-1) begin
+        end else if (count >= DIVIDER*2 && count <= DIVIDER*3-1) begin
             scl_clk <= 1'b1;
             if (scl_in == 1'b0)
-                streach <= 1'b1;
+                stretch <= 1'b1;
             else
-                streach <= 1'b0;
+                stretch <= 1'b0;
             data_clk <= 1'b1;
         end else begin
             scl_clk <= 1'b1;
@@ -55,6 +89,173 @@ begin
         end
     end
 end
+
+assign debug[0] = data_clk;
+
+always @ (posedge clk or posedge rst)
+begin
+    if (rst) begin
+        busy <= 1'b1;
+        scl_enable <= 1'b0;
+        sda_int <= 1'b1;
+        ack_error <= 1'b0;
+        bit_cnt <= 7;
+        state <= IDLE;
+    end else begin
+        if (data_clk == 1'b1 && data_clk_prev == 1'b0) begin
+            case (state)
+                IDLE: begin
+                    if (enable == 1'b1) begin
+                        busy <= 1'b1;
+                        addr_rw <= addr & rw;
+                        data_tx <= data_wr;
+                        state <= START;
+                    end else begin
+                        busy <= 1'b0;
+                        state <= IDLE;
+                    end
+                end
+
+                START: begin
+                    busy <= 1'b1;
+                    sda_int <= addr_rw[bit_cnt-1];
+                    state <= COMMAND;
+                end
+
+                COMMAND: begin
+                    if (bit_cnt == 4'b0000) begin
+                        sda_int <= 1'b1;
+                        bit_cnt <= 7;
+                        state <= SLV_ACK1;
+                    end else begin
+                        bit_cnt <= bit_cnt - 1;
+                        sda_int <= addr_rw[bit_cnt-1];
+                        state <= WR;
+                    end
+                end
+
+                START: begin
+                    busy <= 1'b1;
+                    sda_int <= addr_rw[bit_cnt-1];
+                    state <= COMMAND;
+                end
+
+                COMMAND: begin
+                    if (bit_cnt == 4'b0000) begin
+                        sda_int <= 1'b1;
+                        bit_cnt <= 7;
+                        state<= SLV_ACK1;
+                    end else begin
+                        bit_cnt <= bit_cnt - 1;
+                        sda_int <= addr_rw[bit_cnt-1];
+                        state <= WR;
+                    end
+                end
+
+                SLV_ACK1: begin
+                    if (addr_rw[0] == 1'b0) begin
+                        sda_int <= data_tx[bit_cnt];
+                        state <= WR;
+                    end else begin
+                        sda_int <= 1'b1;
+                        state <= RD;
+                    end
+                end
+
+                WR: begin
+                    busy <= 1'b1;
+                    if (bit_cnt == 4'b0000) begin
+                        sda_int <= 1'b1;
+                        bit_cnt <= 4'h7;
+                        state <= SLV_ACK2;
+                    end else begin
+                        bit_cnt <= bit_cnt - 1;
+                        sda_int <= data_rx[bit_cnt-1];
+                        state <= WR;
+                    end
+                end
+
+                RD: begin
+                    busy <= 1'b1;
+                    if (bit_cnt == 4'b0000) begin
+                        if (enable == 1'b1 && addr_rw == addr && rw)
+                            sda_int <= 1'b0;
+                        else
+                            sda_int <= 1'b1;
+                        bit_cnt <= 4'h7;
+                        data_rd <= data_rx;
+                        state <= MSTR_ACK;
+                    end else begin
+                        bit_cnt <= bit_cnt - 1;
+                        state <= RD;
+                    end
+                end
+
+                SLV_ACK2: begin
+                    if (enable == 1'b1) begin
+                        busy <= 1'b0;
+                        addr_rw <= addr & rw;
+                        data_tx <= data_wr;
+                        if (addr_rw == addr & rw) begin
+                            sda_int <= data_wr[bit_cnt];
+                            state <= WR;
+                        end else begin
+                            state <= START;
+                        end
+                    end else begin
+                        state <= STOP;
+                    end
+                end
+
+                MSTR_ACK: begin
+                    if (enable == 1'b1) begin
+                        busy <= 1'b0;
+                        addr_rw <= addr & rw;
+                        data_tx <= data_wr;
+                        if (addr_rw == addr & rw) begin
+                            sda_int <= 1'b1;
+                            state <= RD;
+                        end else begin
+                            state <= START;
+                        end
+                    end else begin
+                        state <= STOP;
+                    end
+                end
+            endcase
+        end else if (data_clk == 1'b0 && data_clk_prev == 1'b1) begin
+            case (state)
+                START: begin
+                    if (scl_enable == 1'b0) begin
+                        scl_enable <= 1'b1;
+                        ack_error <= 1'b0;
+                    end
+                end
+
+                SLV_ACK1: begin
+                    if (sda_in != 1'b0 || ack_error == 1'b1)
+                        ack_error <= 1'b1;
+                end
+
+                RD: begin
+                    data_rx[bit_cnt] <= sda_in;
+                end
+
+                SLV_ACK2: begin
+                    if (sda_in != 1'b0 || ack_error == 1'b1)
+                        ack_error <= 1'b1;
+                end
+
+                STOP: begin
+                    scl_enable <= 1'b1;
+                end
+            endcase
+        end
+    end
+end
+
+assign sda_enable = (state == START) ? data_clk_prev :
+                    (state == STOP) ? !data_clk_prev : sda_int;
 
 //Tri-State buffer controll
 SB_IO # (

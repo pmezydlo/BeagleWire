@@ -54,6 +54,7 @@ script:
   - make -C $DST_PROJECT/examples/gpio/
   - make -C $DST_PROJECT/examples/pwm/
   - make -C $DST_PROJECT/examples/uart/
+  - make -C $DST_PROJECT/examples/i2c/
 
   - make -C $DST_PROJECT/bridge_lib/ ARCH=arm CROSS_COMPILE=${CC}
 
