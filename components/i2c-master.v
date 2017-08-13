@@ -10,12 +10,11 @@ module i2c_master (input        clk,
                    output [7:0] data_rd,
                    input [7:0]  data_wr,
                    output       fifo_tx,
-                   output [5:0] debug,
-               );
+                   output       fifo_rx,);
 
-parameter BUS_CLK = 400_000;
-parameter CLK_FREQ = 100_000_000;
-localparam DIVIDER = (CLK_FREQ/BUS_CLK)/4;
+parameter  BUS_CLK  = 400_000;
+parameter  CLK_FREQ = 100_000_000;
+localparam DIVIDER  = (CLK_FREQ/BUS_CLK)/4;
 
 localparam IDLE      = 4'b0000;
 localparam START     = 4'b0001;
@@ -28,18 +27,19 @@ localparam MSTR_ACK  = 4'b0111;
 localparam STOP      = 4'b1000;
 
 reg [3:0] state = IDLE;
-reg fifo_tx;
-reg stretch;
+reg       fifo_tx;
+reg       fifo_rx;
+reg       stretch;
 reg [9:0] count;
-reg ack_error;
-reg data_clk;
-reg data_clk_prev;
-wire scl_in;
-reg scl_clk;
-reg scl_enable;
-wire sda_in;
-reg sda_enable;
-reg sda_int = 1'b1;
+reg       ack_error;
+reg       data_clk;
+reg       data_clk_prev;
+wire      scl_in;
+reg       scl_clk;
+reg       scl_enable;
+wire      sda_in;
+reg       sda_enable;
+reg       sda_int = 1'b1;
 reg [7:0] data_rx;
 reg [3:0] bit_cnt = 4'h7;
 reg [7:0] data_tx;
@@ -80,10 +80,6 @@ begin
     end
 end
 
-assign debug[0] = data_clk;
-assign debug[1] = enable;
-assign debug[2] = fifo_tx;
-
 always @ (posedge clk or posedge rst)
 begin
     if (rst) begin
@@ -95,6 +91,8 @@ begin
         state <= IDLE;
         data_rd <= 8'b00000000;
     end else begin
+        fifo_rx <= 1'b0;
+        fifo_tx <= 1'b0;
         if (data_clk == 1'b1 && data_clk_prev == 1'b0) begin
             case (state)
                 IDLE: begin
@@ -119,7 +117,8 @@ begin
                         sda_int <= 1'b1;
                         bit_cnt <= 4'h7;
                         state<= SLV_ACK1;
-                        fifo_tx <= 1'b1;
+                        if (addr_rw[0] == 1'b0)
+                            fifo_tx <= 1'b1;
                     end else begin
                         bit_cnt <= bit_cnt - 1;
                         sda_int <= addr_rw[bit_cnt-1];
@@ -132,7 +131,6 @@ begin
                         sda_int <= data_tx[bit_cnt];
                         state <= WR;
                         data_tx <= data_wr;
-                        fifo_tx <= 1'b0;
                     end else begin
                         sda_int <= 1'b1;
                         state <= RD;
@@ -145,7 +143,8 @@ begin
                         sda_int <= 1'b1;
                         bit_cnt <= 4'h7;
                         state <= SLV_ACK2;
-                        fifo_tx <= 1'b1;
+                        if (addr_rw[0] == 1'b0)
+                            fifo_tx <= 1'b1;
                     end else begin
                         bit_cnt <= bit_cnt - 1;
                         sda_int <= data_tx[bit_cnt-1];
@@ -163,6 +162,7 @@ begin
                         bit_cnt <= 4'h7;
                         data_rd <= data_rx;
                         state <= MSTR_ACK;
+                        fifo_rx <= 1'b1;
                     end else begin
                         bit_cnt <= bit_cnt - 1;
                         state <= RD;
@@ -174,7 +174,6 @@ begin
                         busy <= 1'b0;
                         addr_rw <= {addr, rw};
                         data_tx <= data_wr;
-                        fifo_tx <= 1'b0;
                         if (addr_rw == {addr, rw}) begin
                             sda_int <= data_wr[bit_cnt];
                             state <= WR;
@@ -205,7 +204,6 @@ begin
                 STOP: begin
                     busy <= 1'b0;
                     state <= IDLE;
-                    fifo_tx <= 1'b0;
                 end
 
             endcase
