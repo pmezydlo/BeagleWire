@@ -25,6 +25,7 @@ localparam RD        = 4'b0101;
 localparam SLV_ACK2  = 4'b0110;
 localparam MSTR_ACK  = 4'b0111;
 localparam STOP      = 4'b1000;
+localparam WAIT      = 4'b1001;
 
 reg [3:0] state = IDLE;
 reg       fifo_tx;
@@ -44,7 +45,6 @@ reg [7:0] data_rx;
 reg [3:0] bit_cnt = 4'h7;
 reg [7:0] data_tx;
 reg [7:0] addr_rw;
-
 
 always @ (posedge clk or posedge rst)
 begin
@@ -105,7 +105,7 @@ begin
                         state <= IDLE;
                     end
                 end
-                
+
                 START: begin
                     busy <= 1'b1;
                     sda_int <= addr_rw[bit_cnt];
@@ -181,7 +181,7 @@ begin
                             state <= START;
                         end
                     end else begin
-                        state <= STOP;
+                        state <= WAIT;
                     end
                 end
 
@@ -197,13 +197,18 @@ begin
                             state <= START;
                         end
                     end else begin
-                        state <= STOP;
+                        state <= WAIT;
                     end
                 end
 
                 STOP: begin
                     busy <= 1'b0;
                     state <= IDLE;
+                end
+
+                WAIT: begin
+                    scl_enable <= 1'b0;
+                    sda_int <= 1'b1;
                 end
 
             endcase
@@ -239,7 +244,9 @@ begin
 end
 
 assign sda_enable = (state == START) ? data_clk_prev :
-                    (state == STOP) ? !data_clk_prev : sda_int;
+                    (state == STOP) ? !data_clk_prev : 
+                    (state == WAIT) ? 1'b1 : sda_int;
+                    
 
 //Tri-State buffer controll
 SB_IO # (
@@ -247,7 +254,7 @@ SB_IO # (
     .PULLUP(1'b0)
 ) scl_io (
     .PACKAGE_PIN(scl),
-    .OUTPUT_ENABLE(scl_enable == 1'b1 && scl_clk == 1'b0),
+    .OUTPUT_ENABLE((scl_enable == 1'b1 && scl_clk == 1'b0) || state == WAIT),
     .D_OUT_0(1'b0),
     .D_IN_0(scl_in),
 );
