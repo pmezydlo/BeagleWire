@@ -44,7 +44,7 @@ static int ice40_i2c_probe(struct platform_device *pdev)
 	adapter = &ice40_i2c->adapter;
 	strlcpy(adapter->name, "iCE40", sizeof(adapter->name));
 	adapter->owner = THIS_MODULE;
-	adapter->algo = &ice40_i2c_algo;
+	/*adapter->algo = &ice40_i2c_algo;*/
 	adapter->dev.of_node = pdev->dev.of_node;
 	i2c_set_adapdata(adapter, ice40_i2c);
 	err = i2c_add_adapter(adapter);
