@@ -12,15 +12,39 @@ module top (input         clk,
             output [7:0]  pmod3,
             output [7:0]  pmod4);
 
-parameter ADDR_WIDTH = 4;
+parameter ADDR_WIDTH = 5;
 parameter DATA_WIDTH = 16;
+parameter RAM_DEPTH = 1 << ADDR_WIDTH;
 
-wire oe;
-wire we;
-wire cs;
-wire [ADDR_WIDTH-1:0]  address;
-wire [DATA_WIDTH-1:0]  data_out;
-wire[DATA_WIDTH-1:0]  data_in;
+reg [DATA_WIDTH-1:0] mem [0:RAM_DEPTH];
+
+reg oe;
+reg we;
+reg cs;
+wire[ADDR_WIDTH-1:0]  addr;
+reg [DATA_WIDTH-1:0]  data_out;
+wire [DATA_WIDTH-1:0]  data_in;
+
+wire [47:0] dir;
+wire [47:0] Inputs;
+wire [47:0] Outputs;
+
+always @ (posedge clk)
+begin
+    if (!cs && !we && oe) begin
+        mem[addr] <= data_out;
+    end
+end
+
+always @ (posedge clk)
+begin
+    if (!cs && we && !oe) begin
+        mem[0][5:4] <= btn;
+        data_in <= mem[addr];
+    end else begin
+        data_in <= 0;
+    end
+end
 
 gpmc_sync #(
     .DATA_WIDTH(DATA_WIDTH),
@@ -38,47 +62,11 @@ gpmc_controller (
     .oe(oe),
     .we(we),
     .cs(cs),
-    .address(address),
+    .address(addr),
     .data_out(data_out),
     .data_in(data_in),
 );
 
-dp_sync_ram #(
-    .DATA_WIDTH(DATA_WIDTH),
-    .ADDR_WIDTH(ADDR_WIDTH))
-dual_port_ram (
-    .rst(1'b0),
-    .clk(clk),
-    .cs_0(cs),
-    .we_0(we),
-    .oe_0(oe),
-    .addr_0(address),
-    .data_in_0(data_out),
-    .data_out_0(data_in),
-
-    .cs_1(led_cs),
-    .we_1(1'b1),
-    .oe_1(1'b0),
-    .addr_1(4'b0000),
-    .data_in_1(),
-    .data_out_1(led_data),
-);
-
-reg [DATA_WIDTH-1:0] led_data;
-reg led_cs;
-reg [10:0] counter;
-
-always @ (posedge clk)
-begin
-    if (counter[10] == 1'b1)
-        led_cs <= 1'b0;
-    else
-        led_cs <= 1'b1;
-
-    counter <= counter + 1;
-end
-
-assign pmod1[0] = led_cs;
-assign led = led_data[3:0];
+assign led = mem[0][3:0];
 
 endmodule
