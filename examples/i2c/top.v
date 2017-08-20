@@ -77,23 +77,19 @@ i2c_master i2c1 (
     .scl(scl),
     .sda(sda),
     .enable(mem[0][1]),
-    .addr(7'h50),
+    .addr(mem[0][12:6]),
     .rw(mem[0][2]),
     .busy(busy),
     .ack_error(ack_err),
     .data_rd(data_read),
     .data_wr(mem[1][7:0]),
-    .debug(pmod2),
+    .fast_mode(mem[0][5]),
 );
 
-
-//assign pmod2[7:2] = debug;
 assign led[0] = mem[0][0];
 assign led[1] = mem[0][1];
 assign led[2] = busy;
 assign led[3] = ack_err;
-//assign pmod2[0] = clk;
-//assign pmod2[1] = mem[0][1];
 
 /*
 Memory map:
@@ -118,11 +114,15 @@ Setup register (0x00)
 --------+---------+------+-----------------------------------------+
     4   |    0    |  RO  | Ack error bit                           |
 --------+---------+------+-----------------------------------------+
+    5   |    0    |  R/W | Transfer rates (1 - fast 0 - slow mode) |
+--------+---------+------+-----------------------------------------+
+ 12-6   |    0    |  R/W | Slave address                           |
+--------+---------+------+-----------------------------------------+
 
 TX and RX data register (0x02)
    bit  | default |      | destination          |
 --------+---------+------+----------------------+
-   7-0  |    0    |  R/W | Data to send         |
+   7-0  |    0    |  R/W | Write data           |
 --------+---------+------+----------------------+
   15-8  |    0    |  RO  | Read data            |
 --------+---------+------+----------------------+

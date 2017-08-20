@@ -8,12 +8,14 @@ module i2c_master (input        clk,
                    output       busy,
                    output       ack_error,
                    output [7:0] data_rd,
-                   input [7:0]  data_wr,
-                    output [7:0] debug);
+                   input  [7:0] data_wr,
+                   input        fast_mode);
 
-parameter  BUS_CLK  = 400_000;
+parameter  BUS_CLK_400  = 400_000;
+parameter  BUS_CLK_100  = 100_000;
 parameter  CLK_FREQ = 100_000_000;
-localparam DIVIDER  = (CLK_FREQ/BUS_CLK)/4;
+localparam DIVIDER_400  = (CLK_FREQ/BUS_CLK_400/4);
+localparam DIVIDER_100  = (CLK_FREQ/BUS_CLK_100/4);
 
 localparam IDLE      = 4'b0000;
 localparam START     = 4'b0001;
@@ -28,6 +30,7 @@ localparam STOP      = 4'b1000;
 reg [3:0] state = IDLE;
 reg       stretch;
 reg [9:0] count;
+reg [9:0] pre_div;
 reg       ack_error;
 reg       data_clk;
 reg       data_clk_prev;
@@ -50,19 +53,24 @@ begin
     end else begin
         data_clk_prev <= data_clk;
 
-        if (count == DIVIDER*4-1) begin
+        if (fast_mode)
+            pre_div <= DIVIDER_400;
+        else
+            pre_div <= DIVIDER_100;
+
+        if (count == pre_div*4-1) begin
             count <= 0;
         end else if (stretch == 1'b0) begin
             count <= count + 1;
         end
 
-        if (count > 0 && count <= DIVIDER-1) begin
+        if (count > 0 && count <= pre_div-1) begin
             scl_clk <= 1'b0;
             data_clk <= 1'b0;
-        end else if (count >= DIVIDER && count <= DIVIDER*2-1) begin
+        end else if (count >= pre_div && count <= pre_div*2-1) begin
             scl_clk <= 1'b0;
             data_clk <= 1'b1;
-        end else if (count >= DIVIDER*2 && count <= DIVIDER*3-1) begin
+        end else if (count >= pre_div*2 && count <= pre_div*3-1) begin
             scl_clk <= 1'b1;
             if (scl_in == 1'b0)
                 stretch <= 1'b1;
