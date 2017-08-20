@@ -11,8 +11,12 @@ int main()
 	if (bridge_init(&br, BW_BRIDGE_MEM_ADR, BW_BRIDGE_MEM_SIZE) < 0)
 		return 1;
 
-	char tab[] = "HELLO WORD";
-	set_fpga_mem(&br, 0, &tab[0], sizeof(tab));
+	void *ptr = br.virt_addr;
+
+	while (1)
+		*(uint16_t *)(ptr) = *(uint16_t *)(ptr)>>4;
+
+
 
 	bridge_close(&br);
 

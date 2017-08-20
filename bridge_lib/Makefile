@@ -4,9 +4,9 @@ CC = $(CROSS_CC)gcc
 PWD = $(shell pwd)
 CFLAGS = -Wall -g
 
-SRCS = main.c bw_bridge.c
+SRCS = i2c_br.c bw_bridge.c
 OBJS = $(SRCS: .c=.o)
-MAIN = main
+MAIN = i2c_br
 
 all: $(MAIN)
 
