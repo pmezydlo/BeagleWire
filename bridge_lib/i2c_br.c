@@ -7,23 +7,24 @@
 int main()
 {
 	struct bridge br;
+	int i;
+	void *ptr;
+	char text[] = {0x0, 0x0};
+	char rd_text[11];
 
 	if (bridge_init(&br, BW_BRIDGE_MEM_ADR, BW_BRIDGE_MEM_SIZE) < 0)
 		return 1;
 
-	void *ptr = br.virt_addr;
+	ptr = br.virt_addr;
 
-	// clr reset (enable controler)
+	/* clr reset (enable controler)*/
 	*(uint16_t *)(ptr) &= ~1;
 
 
-	int i;
-	char text[] = {0x0, 0x0};
-	char rd_text[11];
 	*(uint16_t *)(ptr) &= ~4;
 
 
-	for (int i=0;i<sizeof(text);i++) {
+	for (i=0;i<sizeof(text);i++) {
 
 	*(uint16_t *)(ptr + 2) = text[i];
 
@@ -34,8 +35,6 @@ int main()
 
 	// set enable bit
 	*(uint16_t *)(ptr) |= 2;
-
-
 
 	while (!(*(uint16_t *)(ptr) & (1 << 3)));
 
@@ -69,29 +68,7 @@ int main()
 	for (i=0;i<sizeof(rd_text);i++)
 		printf("%c", rd_text[i]);
 
-	//
-	/*
-	while (1) {
-		*(uint16_t *)(ptr) |= 1;
-		*(uint16_t *)(ptr) &= ~1;
-	}
-	/*
-       *(uint16_t *)(ptr) &= ~32;
 
-
-/*
-
-	// load tx fifo
-	char text[] = "GSoC201";
-	unsigned int i;
-	for (i = 0; i<sizeof(text); i++) {
-		while (*(uint16_t *)(ptr + 2) & (1 << 2));
-		*(uint16_t *)(ptr + 6) = text[i];
-		*(uint16_t *)(ptr + 2) |= 1;
-		*(uint16_t *)(ptr + 2) &= ~1;
-	}
-
-*/
 	bridge_close(&br);
 
 	return 0;
