@@ -7,6 +7,18 @@
 
 #define DRIVER_NAME "ice40-i2c"
 
+#define ICE40_I2C_SETUP_REG		0x0
+#define ICE40_I2C_DATA_TX_REG		0x2
+#define ICE40_I2C_DATA_RX_REG		0x4
+
+#define ICE40_I2C_RESET_BIT		BIT(0)
+#define ICE40_I2C_ENABLE_BIT		BIT(1)
+#define ICE40_I2C_RW_BIT		BIT(2)
+#define ICE40_I2C_BUSY_BIT		BIT(3)
+#define ICE40_I2C_ACK_ERR_BIT		BIT(4)
+#define ICE40_I2C_FAST_MODE_BIT		BIT(5)
+#define ICE40_I2C_ADDR(x)		(x << 6)
+
 struct ice40_i2c {
 	struct i2c_adapter adapter;
 	void *base;
@@ -24,7 +36,105 @@ inline void ice40_i2c_write(void __iomem *base,
 	iowrite16(val, base + idx);
 }
 
+int ice40_i2c_wait_for_start(void __iomem *reg, u16 bit)
+{
+	unsigned long timeout;
 
+	timeout = jiffies + msecs_to_jiffies(1000);
+	while (!(ioread16(reg) & bit)) {
+		if (time_after(jiffies, timeout))
+			return -ETIMEDOUT;
+		else
+			return 0;
+
+		/*cpu_relax();*/
+	}
+	return 0;
+}
+
+int ice40_i2c_wait_for_end(void __iomem *reg, u16 bit)
+{
+	unsigned long timeout;
+
+	timeout = jiffies + msecs_to_jiffies(1000);
+	while (ioread16(reg) & bit) {
+		if (time_after(jiffies, timeout))
+			return -ETIMEDOUT;
+		else
+			return 0;
+
+		/*cpu_relax();*/
+	}
+	return 0;
+}
+
+static int ice40_i2c_xfer_one_msg(void *base, struct i2c_msg *msg)
+{
+	uint16_t setup;
+	int xfer_len = 0;
+
+	setup = ioread16(base + ICE40_I2C_SETUP_REG);
+	if (msg->addr)
+		setup |= ICE40_I2C_ADDR(msg->addr);
+
+	if (msg->flags & I2C_M_RD)
+		setup |= ICE40_I2C_RW_BIT;
+	else
+		setup &= ~ICE40_I2C_RW_BIT;
+
+	while (xfer_len < msg->len) {
+
+		if (!(msg->flags & I2C_M_RD))
+			iowrite16(msg->buf[xfer_len],
+				base + ICE40_I2C_DATA_TX_REG);
+
+		setup |= ICE40_I2C_ENABLE_BIT;
+		iowrite16(setup, base + ICE40_I2C_SETUP_REG);
+
+		ice40_i2c_wait_for_start(base + ICE40_I2C_SETUP_REG,
+					 ICE40_I2C_BUSY_BIT);
+
+		setup &= ~ICE40_I2C_ENABLE_BIT;
+		iowrite16(setup, base + ICE40_I2C_SETUP_REG);
+
+		ice40_i2c_wait_for_end(base + ICE40_I2C_SETUP_REG,
+				       ICE40_I2C_BUSY_BIT);
+
+		if (msg->flags & I2C_M_RD)
+			msg->buf[xfer_len] = ioread16(base +
+						      ICE40_I2C_DATA_RX_REG);
+
+		xfer_len++;
+	}
+
+	return 0;
+}
+
+static int ice40_i2c_xfer(struct i2c_adapter *adap, struct i2c_msg msgs[],
+			  int num)
+{
+	struct ice40_i2c *ice40_i2c = i2c_get_adapdata(adap);
+	int msg_num;
+	int err;
+
+	for (msg_num = 0; msg_num < num; msg_num++) {
+		err = ice40_i2c_xfer_one_msg(ice40_i2c->base, &msgs[msg_num]);
+		if (err)
+			return err;
+	}
+
+	return msg_num;
+}
+
+static u32 ice40_i2c_functionality(struct i2c_adapter *adap)
+{
+	return I2C_FUNC_I2C;
+}
+
+static const struct i2c_algorithm ice40_i2c_algo = {
+	.master_xfer = ice40_i2c_xfer,
+	.functionality = ice40_i2c_functionality,
+};
 
 static int ice40_i2c_probe(struct platform_device *pdev)
 {
@@ -32,6 +142,7 @@ static int ice40_i2c_probe(struct platform_device *pdev)
 	struct i2c_adapter *adapter;
 	int err;
 	struct resource *res;
+	uint16_t setup;
 
 	ice40_i2c = devm_kzalloc(&pdev->dev, sizeof(*ice40_i2c), GFP_KERNEL);
 
@@ -44,7 +155,7 @@ static int ice40_i2c_probe(struct platform_device *pdev)
 	adapter = &ice40_i2c->adapter;
 	strlcpy(adapter->name, "iCE40", sizeof(adapter->name));
 	adapter->owner = THIS_MODULE;
-	/*adapter->algo = &ice40_i2c_algo;*/
+	adapter->algo = &ice40_i2c_algo;
 	adapter->dev.of_node = pdev->dev.of_node;
 	i2c_set_adapdata(adapter, ice40_i2c);
 	err = i2c_add_adapter(adapter);
@@ -52,6 +163,11 @@ static int ice40_i2c_probe(struct platform_device *pdev)
 		pr_info("I2C data not set");
 		return err;
 	}
+
+	setup = ice40_i2c_read(ice40_i2c->base, ICE40_I2C_SETUP_REG);
+	setup &= ~ICE40_I2C_RESET_BIT;
+	setup |= ICE40_I2C_FAST_MODE_BIT;
+	ice40_i2c_write(ice40_i2c->base, ICE40_I2C_SETUP_REG, setup);
 
 	pr_info("ice40 i2c probe called");
 
