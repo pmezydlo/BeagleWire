@@ -36,38 +36,6 @@ inline void ice40_i2c_write(void __iomem *base,
 	iowrite16(val, base + idx);
 }
 
-int ice40_i2c_wait_for_start(void __iomem *reg, u16 bit)
-{
-	unsigned long timeout;
-
-	timeout = jiffies + msecs_to_jiffies(1000);
-	while (!(ioread16(reg) & bit)) {
-		if (time_after(jiffies, timeout))
-			return -ETIMEDOUT;
-		else
-			return 0;
-
-		/*cpu_relax();*/
-	}
-	return 0;
-}
-
-int ice40_i2c_wait_for_end(void __iomem *reg, u16 bit)
-{
-	unsigned long timeout;
-
-	timeout = jiffies + msecs_to_jiffies(1000);
-	while (ioread16(reg) & bit) {
-		if (time_after(jiffies, timeout))
-			return -ETIMEDOUT;
-		else
-			return 0;
-
-		/*cpu_relax();*/
-	}
-	return 0;
-}
-
 static int ice40_i2c_xfer_one_msg(void *base, struct i2c_msg *msg)
 {
 	uint16_t setup;
@@ -91,14 +59,17 @@ static int ice40_i2c_xfer_one_msg(void *base, struct i2c_msg *msg)
 		setup |= ICE40_I2C_ENABLE_BIT;
 		iowrite16(setup, base + ICE40_I2C_SETUP_REG);
 
-		ice40_i2c_wait_for_start(base + ICE40_I2C_SETUP_REG,
-					 ICE40_I2C_BUSY_BIT);
+		while (!(ioread16(base + ICE40_I2C_SETUP_REG)
+		       & ICE40_I2C_BUSY_BIT))
+			;
+
 
 		setup &= ~ICE40_I2C_ENABLE_BIT;
 		iowrite16(setup, base + ICE40_I2C_SETUP_REG);
 
-		ice40_i2c_wait_for_end(base + ICE40_I2C_SETUP_REG,
-				       ICE40_I2C_BUSY_BIT);
+		while (ioread16(base + ICE40_I2C_SETUP_REG)
+		       & ICE40_I2C_BUSY_BIT)
+			;
 
 		if (msg->flags & I2C_M_RD)
 			msg->buf[xfer_len] = ioread16(base +
@@ -138,28 +109,31 @@ static const struct i2c_algorithm ice40_i2c_algo = {
 
 static int ice40_i2c_probe(struct platform_device *pdev)
 {
+	struct device *dev = &pdev->dev;
 	struct ice40_i2c *ice40_i2c;
-	struct i2c_adapter *adapter;
-	int err;
+	int err = 0;
 	struct resource *res;
 	uint16_t setup;
 
-	ice40_i2c = devm_kzalloc(&pdev->dev, sizeof(*ice40_i2c), GFP_KERNEL);
+	ice40_i2c = devm_kzalloc(dev, sizeof(*ice40_i2c), GFP_KERNEL);
+	if (!ice40_i2c)
+		return -ENOMEM;
 
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-	ice40_i2c->base = devm_ioremap_resource(&pdev->dev, res);
+	ice40_i2c->base = devm_ioremap_resource(dev, res);
 	if (IS_ERR(ice40_i2c->base))
 		return PTR_ERR(ice40_i2c->base);
 
+	ice40_i2c->adapter.owner = THIS_MODULE;
+	ice40_i2c->adapter.algo = &ice40_i2c_algo;
+	ice40_i2c->adapter.dev.parent = dev;
+	strlcpy(ice40_i2c->adapter.name, pdev->name,
+		sizeof(ice40_i2c->adapter.name));
+	i2c_set_adapdata(&ice40_i2c->adapter, ice40_i2c);
 	platform_set_drvdata(pdev, ice40_i2c);
-	adapter = &ice40_i2c->adapter;
-	strlcpy(adapter->name, "iCE40", sizeof(adapter->name));
-	adapter->owner = THIS_MODULE;
-	adapter->algo = &ice40_i2c_algo;
-	adapter->dev.of_node = pdev->dev.of_node;
-	i2c_set_adapdata(adapter, ice40_i2c);
-	err = i2c_add_adapter(adapter);
-	if (!(err)) {
+
+	err = i2c_add_adapter(&ice40_i2c->adapter);
+	if (err) {
 		pr_info("I2C data not set");
 		return err;
 	}
