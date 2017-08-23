@@ -62,6 +62,10 @@ gpmc_controller (
     .data_in(data_in),
 );
 
+initial begin
+    mem[0][0] = 1'b1;
+end
+
 wire clk_200m;
 wire lock;
 

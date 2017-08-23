@@ -9,11 +9,6 @@ Features:
   - Configurable signal polarity
 
 Introduction:
-Projekt dostarcza kompletny modul PWM (Pulse Width Modulation) do uzycia z FPGas napisany
-w verilogu. Projekt zostal stworzony przy uzyciu IceStorm toolchains. Kontroler jest mapowany
-w pamieci ARM korzystajac z GPMC bus dzieki temu po podlaczeniu Linux driver lub prostej applikacji
-mozna sterowac, czestotliwoscia, wypenieniem i polaryzacja sygnalu PWM.
-
 The project provides a complete PWM (Pulse Width Modulation) module written in verilog, which is 
 intended for use with FPGAs. It has been created with the use of IceStorm toolchains. 
 
@@ -36,28 +31,31 @@ intended for use with FPGAs. It has been created with the use of IceStorm toolch
                     |                                                      |
                     +------------------------------------------------------+
 
+Background:
+
+About GPMC:
+The controller is mapped in ARM memory with the use of GPMC bus. Thanks to that, after connecting a Linux driver or a simple application, it is possible to control frequency, duty cycle and polarization of PWM signal.
+
 Duty Cycle:
-W tym rejestrze ustawia sie wypenienie sygnalu w nano seconds:
+In this register, a signal’s duty cycle can be set in nano seconds:
 PWM_duty_counter = Duty_ns / Clock_period (200MHz = 20ns)
 
-Period:
-Rejestr sluzy do ustawienia czestotliwosci sygnalu PWM. Nalezy obliczyc wartosc licznika:
-PWM_counter = Period_ns / Clock_period (200MHz = 20ns).
- 
+Period: 
+The register is used to set the frequency of PWM signal. It is necessary to calculate the counter’s value:  PWM_counter = Period_ns / Clock_period (200MHz = 20ns).
+
 Clock:
-Zrodlo zegara dla controllera PWM wynosi 200MHz. Dzieki temu generowany sygnal jest
-dokladniejszy. 
+The clock’s source for PWM controller is 200MHz. Thanks to that, the generated signal is more accurate.
 
 Enable:
-Ustawienie tego bitu powoduje aktywacje generowania sygnalu PWM.
+Setting this bit activates generation of PWM signal.
 
 Reset:
-Reset jest asynchroniczny i aktywny po właczeniu układu. Reset nalezy 
-wylaczyc ustawiajac bit na pierwszej pozcyji w rejestrze ustawien (0x00) (Setup register).
+Reset is asynchrononous and active after turning on the system. Reset should be turned off by clearing bit on the first position in setup register (0x00).
 
 Polarity:
-Ustawienie bitu polarity (pozycja 3) powoduje inwersje sygnalu PWM.
+Setting polarity bit (position 3) causes the inversion of PWM signal.
 
+Reset is asynchronous and active after turning on the system. Reset should be turned off by clearing bit on the first position in setting register (0x00).
 
 Memory map:
 
@@ -74,7 +72,7 @@ Setup register (0x00)
 
    bit  | default |      | destination                             |
 --------+---------+------+-----------------------------------------+
-    0   |    0    |  R/W | Reset bit                               |
+    0   |    1    |  R/W | Reset bit                               |
 --------+---------+------+-----------------------------------------+
     1   |    0    |  R/W | Enable bit                              |
 --------+---------+------+-----------------------------------------+

@@ -11,7 +11,7 @@
 	fragment@0 {
 		target = <&ocp>;
 		__overlay__ {
-			gpio_ice40 {
+			gpio-ice40 {
                                 compatible = "linux,gpio-mmio";
 				reg = <0x1000000 0x8>, <0x1000008 0x8>, <x01000010 0x8>;
 				reg-names = "dirout", "dat", "set"; 

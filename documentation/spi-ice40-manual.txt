@@ -7,10 +7,7 @@ Features:
   - Selectable clock polarity and clock phase
 
 Introduction:
-Ten projekt dostarcza gotowy kontroler SPI Master przeznaczony dla FPGAs napisany w Verilogu. 
-Projekt jest tworzony przy uzyciu IceStrom Toolchain. Projekt zawiera kontroler SPI master oraz
-komponent GPMC, dzięki temu kontroler SPI jest mapowany w pamieci ARM, mozesz korzystac z tego 
-kontrolera jak z kazdego innego kontrolera umieszczonego w krzemie twojego processora.
+This project provides a ready SPI Master controller written in Verilog, which is intended for FPGAs. This project is developed with the use of IceStorm Toolchain. It contains SPI Master controller and GPMC component - thanks to that SPI controller is mapped in ARM memory. This controller can be used as any other controller located in in the silicon of your processor.
 
   +-----------+     +-------------------------------------------------------------------------+
   |  arm      |     |    fpga ice40                                                           |
@@ -41,36 +38,26 @@ About SPI:
 The Serial Peripheral Interface bus (SPI) is a synchronous serial communication interface.
 An SPI communication is a full-duplex, using four wires. 
 
-About GPMC:
-Rejestry kontrolera spi sa mapowane w pamieci ARM przy uzyciu GPMC bus. 
-Wiecej informacji na temap mapowania logiki mozna znalezc w ())()())..txt.
-
 Reset:
-Reset jest asynchroniczny i aktywny po właczeniu układu. Reset nalezy 
-wylaczyc ustawiajac bit na pierwszej pozcyji w rejestrze ustawien (0x00) (setting register).
+Reset is asynchronous and active after turning on the system. Reset should be turned off by clearing bit on the first position in setting register (0x00).
 
 Clock:
-Kontroler posiada dzielnik czestotliwosci. Wartosc dzielnika mozesz zmienic w kazdej chwili. Wartosc dzielnika
-umieszczona jest w rejestrze ustawien na pozycji (15-10). 
-zrodlo zegara dla SPI wynosi 20Mhz. Ustawiajac dzielnik na 2 otrzymasz 10Mhz itd.
+Controller has a frequency divider. The value of frequency divider can be changed anytime. Its value is located in setting register on position 15-10.The source of clock for SPI is 20MHz. By setting divider to 2 you will receive 10MHz etc.
 
 Bits per word:
-Kontroler wspiera rozne dlugosc slowa od 2 do 32 bitow. Na starcie kazdej transakcjii liczba
-bitow jest zatrzaskiwana. Od liczby bitow nalzy odjac 1 i wpisac do rejestru ustawien na pozycje (9:5)
+Controller supports various word lengths, ranging from 2 to 32 bits. On the beginning of each transaction the number of bits is latched. From the number of bits 1 has to be deducted and written into setting register on 9:5 position.
 
 Polarity and Phase:
-The enable pin latches in the standard logic values of cpol and cpha at the start of each transaction.
-This allows communication with individual slaves using independent SPI modes. If all slaves require 
-the same mode, cpol and cpha can simply be tied to the corresponding logic levels.
+The enable pin latches in the standard logic values of cpol and cpha at the start of each transaction. This allows communication with individual slaves using independent SPI modes. If all slaves require the same mode, cpol and cpha can simply be tied to the corresponding logic levels.
 
 Transactions:
-	1. Ustawic ustawienia dotyczace transakcji.
-	2. Zaladowac dane do buffora wysylajacego (0x4).
-	3. Ustawic start bit
-	4. Wyczyscic bit startu (w tej chwili slowo jest wysylane)  
-	5. Czekac az bit new_data zostanie ustawiony.
-	6. Dane sa gotowe do odbioru.
-	7. Powrot do punktu 2
+	1. Set the transaction settings,
+	2. Load data into transmit buffer (0x4),
+	3. Set start bit,
+	4. Clear start bit (at this stage the word is transmitted),
+	5. Wait until the new_data bit is set,
+	6. Data is ready to receive,
+	7. Back to step 2,
 
 Memory map:
 
@@ -89,7 +76,7 @@ Setup register (0x00)
 
    bit  | default |      | destination          |
 --------+---------+------+----------------------+
-    0   |    0    |  R/W | Reset controller     |
+    0   |    1    |  R/W | Reset controller     |
 --------+---------+------+----------------------+
     1   |    0    |  R/W | Start sending data   |
 --------+---------+------+----------------------+

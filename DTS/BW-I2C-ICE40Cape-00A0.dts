@@ -5,19 +5,18 @@
 	compatible = "ti,beaglebone", "ti,beaglebone-black";
 
 	/* Identification */
-	part-number = "BW-PWM-ICE40Cape";
+	part-number = "BW-I2C-ICE40Cape";
 	version = "00A0";
 
 	fragment@0 {
 		target = <&ocp>;
 		__overlay__ {
-			ice40-pwm {
+			ic40-i2c {
 				#address-cells = <1>;
 				#size-cells = <0>;
-				reg = <0x1000000 0x2000>;
+				reg = <0x1000000 0x20>;
 				status = "okay";
-				compatible = "beagle,ice40-pwm";
-				pwm-device-id = <0>;
+				compatible = "beagle,ice40-i2c";		
 			};
 		};
 	};

@@ -8,7 +8,7 @@ Required properties:
     description of the cells format.
 
 Examples:
-        pwm-ice40: pwm@1000000 {
+        pwm-ice40 {
 		compatible = "beagle,ice40-pwm";
 		reg = <0x1000000 0x2000>;
 		#pwm-cells = <>;
