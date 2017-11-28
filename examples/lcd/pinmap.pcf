@@ -15,10 +15,28 @@ set_io led[2] 31
 set_io led[3] 32
 
 # pmod
-set_io r 38
-set_io g 37
-set_io b 41
+set_io rgb565[0] 38  # B3
+set_io rgb565[1] 37  # B4
+set_io rgb565[2] 41  # B5
+set_io rgb565[3] 39  # B6
+set_io rgb565[4] 43  # B7
+set_io rgb565[5] 42  # G2
+set_io rgb565[6] 45  # G3
+set_io rgb565[7] 44  # G4
 
-set_io pclk 39
-set_io de 43
-set_io disp_on 42
+set_io rgb565[8] 48  # G5
+set_io rgb565[9] 47  # G6
+set_io rgb565[10] 52 # G7
+set_io rgb565[11] 49 # R3
+set_io rgb565[12] 56 # R4
+set_io rgb565[13] 55 # R5
+set_io rgb565[14] 62 # R6
+set_io rgb565[15] 60 # R7
+
+set_io pclk 107
+set_io de 110
+set_io disp_on 112
+
+# button
+set_io btn[0] 25
+set_io btn[1] 26
