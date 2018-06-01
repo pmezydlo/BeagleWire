@@ -21,27 +21,27 @@ create_swap () {
 
 install_icestorm () {
     echo "Installing the IceStorm Tools (icepack, icebox, iceprog, icetime, chip databases)"
-    git clone https://github.com/cliffordwolf/icestorm.git icestorm
+    sudo git clone https://github.com/cliffordwolf/icestorm.git icestorm
     cd ./icestorm
-    make -j$(nproc)
+    sudo make -j$(nproc)
     sudo make install
     cd ../
 }
 
 install_arachne () {
     echo "Installing Arachne-PNR (the place&route tool)"
-    git clone https://github.com/cseed/arachne-pnr.git arachne-pnr
+    sudo git clone https://github.com/cseed/arachne-pnr.git arachne-pnr
     cd ./arachne-pnr
-    make -j$(nproc)
+    sudo make -j$(nproc)
     sudo make install
     cd ../
 }
 
 install_yosys () {
     echo "Installing Yosys (Verilog synthesis)"
-    git clone https://github.com/cliffordwolf/yosys.git yosys
+    sudo git clone https://github.com/cliffordwolf/yosys.git yosys
     cd ./yosys
-    make -j$(nproc)
+    sudo make -j$(nproc)
     sudo make install
     cd ../
 }

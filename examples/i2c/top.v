@@ -9,8 +9,7 @@ module top (input         clk,
             input  [1:0]  btn,
 
             inout         scl,
-            inout         sda,
-            output  [7:0] pmod2);
+            inout         sda);
 
 parameter ADDR_WIDTH = 4;
 parameter DATA_WIDTH = 16;

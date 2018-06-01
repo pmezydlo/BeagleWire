@@ -39,7 +39,6 @@ end
 always @ (posedge clk)
 begin
     if (!cs && we && !oe) begin
-        mem[0][5:4] <= btn;
         data_in <= mem[addr];
     end else begin
         data_in <= 0;

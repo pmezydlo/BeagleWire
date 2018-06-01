@@ -55,7 +55,7 @@ set_io pmod2[5] 55
 set_io pmod2[6] 62
 set_io pmod2[7] 60
 
-set_io pmod3[0] 117 
+set_io pmod3[0] 107 
 set_io pmod3[1] 110
 set_io pmod3[2] 112
 set_io pmod3[3] 113
