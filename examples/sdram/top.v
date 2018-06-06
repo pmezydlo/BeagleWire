@@ -39,30 +39,66 @@ wire[ADDR_WIDTH-1:0]  addr;
 reg [DATA_WIDTH-1:0]  data_out;
 wire [DATA_WIDTH-1:0]  data_in;
 
-always @ (posedge clk)
+always @ (posedge clk_200)
 begin
     if (!cs && !we && oe) begin
-        mem[0][4]   <= sd_rd_ready;
-        mem[0][1]   <= sd_busy;
-        mem[3][7:0] <= sd_rd_data;
         mem[addr]   <= data_out;
     end
 end
 
-always @ (posedge clk)
+always @ (posedge clk_200)
 begin
     if (!cs && we && !oe) begin
+        mem[0][4]   <= sd_rd_ready;
+        mem[0][1]   <= sd_busy;
+        mem[4][7:0] <= sd_rd_data;
         data_in <= mem[addr];
     end else begin
         data_in <= 0;
     end
 end
 
+/*
+icepll -i 100 -o 200
+
+F_PLLIN:   100.000 MHz (given)
+F_PLLOUT:  200.000 MHz (requested)
+F_PLLOUT:  200.000 MHz (achieved)
+
+FEEDBACK: SIMPLE
+F_PFD:  100.000 MHz
+F_VCO:  800.000 MHz
+
+DIVR:  0 (4'b0000)
+DIVF:  7 (7'b0000111)
+DIVQ:  2 (3'b010)
+
+FILTER_RANGE: 5 (3'b101)
+*/
+
+wire clk_200;
+wire lock;
+
+SB_PLL40_CORE #(
+    .FEEDBACK_PATH("SIMPLE"),
+    .PLLOUT_SELECT("GENCLK"),
+    .DIVR(4'b0000),
+    .DIVF(7'b0000111),
+    .DIVQ(3'b010),
+    .FILTER_RANGE(3'b101)
+) uut (
+    .LOCK(lock),
+    .RESETB(1'b1),
+    .BYPASS(1'b0),
+    .REFERENCECLK(clk),
+    .PLLOUTCORE(clk_200)
+);
+
 gpmc_sync #(
     .DATA_WIDTH(DATA_WIDTH),
     .ADDR_WIDTH(ADDR_WIDTH))
 gpmc_controller (
-    .clk(clk),
+    .clk(clk_200),
 
     .gpmc_ad(gpmc_ad),
     .gpmc_advn(gpmc_advn),
@@ -83,10 +119,10 @@ assign pmod1 = 8'b00000000;
 assign pmod2 = 8'b00000000;
 assign pmod3 = 8'b00000000;
 assign pmod4 = 8'b00000000;
-assign led = mem[0][4:1];
+
 assign sdram_clk = clk;
 
-wire [12:0] sd_addr;
+wire [24:0] sd_addr;
 wire [7:0]  sd_rd_data;
 wire [7:0]  sd_wr_data;
 wire        sd_wr_enable;
@@ -95,8 +131,9 @@ wire        sd_busy;
 wire        sd_rd_ready; 
 wire        sd_rst;
 
-assign sd_addr    = mem[1][12:0];
-assign sd_wr_data = mem[2][7:0];
+assign sd_addr[15:0]  = mem[1];
+assign sd_addr[24:16] = mem[2][8:0];
+assign sd_wr_data     = mem[3][7:0];
 
 assign sd_wr_enable = mem[0][3];
 assign sd_rd_enable = mem[0][2];
@@ -110,7 +147,7 @@ sdram_controller sdram_controller_1 (
     .rd_addr(sd_addr),
     .rd_enable(sd_rd_enable),
     .rd_data(sd_rd_data),
-    .rd_ready(sd_rd_enable),
+    .rd_ready(sd_rd_ready),
     .busy(sd_busy),
     
     .clk(clk),

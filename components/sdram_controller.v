@@ -1,27 +1,3 @@
-/**
- * simple controller for ISSI IS42S16160G-7 SDRAM found in De0 Nano
- *  16Mbit x 16 data bit bus (32 megabytes)
- *  Default options
- *    133Mhz
- *    CAS 3
- *
- *  Very simple host interface
- *     * No burst support
- *     * haddr - address for reading and wriging 16 bits of data
- *     * data_input - data for writing, latched in when wr_enable is highz0
- *     * data_output - data for reading, comes available sometime
- *       *few clocks* after rd_enable and address is presented on bus
- *     * rst_n - start init ram process
- *     * rd_enable - read enable, on clk posedge haddr will be latched in,
- *       after *few clocks* data will be available on the data_output port
- *     * wr_enable - write enable, on clk posedge haddr and data_input will
- *       be latched in, after *few clocks* data will be written to sdram
- *
- * Theory
- *  This simple host interface has a busy signal to tell you when you are
- *  not able to issue commands.
- */
-
 module sdram_controller (
     input  [HADDR_WIDTH-1:0]   wr_addr,
     input  [7:0]               wr_data,
@@ -46,13 +22,12 @@ module sdram_controller (
     output                     data_mask 
 );
 
-/* Internal Parameters */
 parameter ROW_WIDTH = 13;
 parameter COL_WIDTH = 10;
 parameter BANK_WIDTH = 2;
 
 parameter SDRADDR_WIDTH = ROW_WIDTH > COL_WIDTH ? ROW_WIDTH : COL_WIDTH;
-parameter HADDR_WIDTH = BANK_WIDTH + ROW_WIDTH + COL_WIDTH;
+parameter HADDR_WIDTH   = BANK_WIDTH + ROW_WIDTH + COL_WIDTH;
 
 parameter CLK_FREQUENCY = 133;  // Mhz
 parameter REFRESH_TIME =  32;   // ms     (how often we need to refresh)
@@ -66,7 +41,6 @@ localparam CYCLES_BETWEEN_REFRESH = ( CLK_FREQUENCY
                                       * REFRESH_TIME
                                     ) / REFRESH_COUNT;
 
-// STATES - State
 localparam IDLE      = 5'b00000;
 
 localparam INIT_NOP1 = 5'b01000,
@@ -105,8 +79,6 @@ localparam CMD_PALL = 8'b10010001,
            CMD_READ = 8'b10101xx1,
            CMD_WRIT = 8'b10100xx1;
 
-/* I/O Registers */
-/*
 reg  [HADDR_WIDTH-1:0]   haddr_r;
 reg  [7:0]               wr_data_r;
 reg  [7:0]               rd_data_r;
@@ -115,23 +87,19 @@ reg                      data_mask_r;
 reg [SDRADDR_WIDTH-1:0]  addr_r;
 reg [BANK_WIDTH-1:0]     bank_addr_r;
 reg                      rd_ready_r;
-
 wire [7:0]               data_output;
 wire                     data_mask;
 
 assign data_mask = data_mask_r;
 assign rd_data   = rd_data_r;
 
-/* Internal Wiring *//*
 reg [3:0] state_cnt;
 reg [9:0] refresh_cnt;
 
 reg [7:0] command;
-*/
 reg [4:0] state;
 
-// TODO output addr[6:4] when programming mode register
-/*
+
 reg [7:0] command_nxt;
 reg [3:0] state_cnt_nxt;
 reg [4:0] next;
@@ -141,10 +109,20 @@ assign {clock_enable, cs_n, ras_n, cas_n, we_n} = command[7:3];
 assign bank_addr      = (state[4]) ? bank_addr_r : command[2:1];
 assign addr           = (state[4] | state == INIT_LOAD) ? addr_r : { {SDRADDR_WIDTH-11{1'b0}}, command[0], 10'd0 };
 
+wire [7:0] data_in_from_buffer;
+//Tri-State buffer controll
+SB_IO # (
+    .PIN_TYPE(6'b1010_01),
+    .PULLUP(1'b 0)
+) data_io [7:0] (
+    .PACKAGE_PIN(data),
+    .OUTPUT_ENABLE(state == WRIT_CAS),
+    .D_OUT_0(wr_data_r),
+    .D_IN_0(data_in_from_buffer)
+);
 
-wire [7:0] rd_data_r_in;
 assign rd_ready = rd_ready_r;
-/*
+
 // HOST INTERFACE
 // all registered on posedge
 always @ (posedge clk)
@@ -175,7 +153,7 @@ always @ (posedge clk)
 
     if (state == READ_READ)
       begin
-      rd_data_r <= rd_data_r_in;
+      rd_data_r <= data_in_from_buffer;
       rd_ready_r <= 1'b1;
       end
     else
@@ -189,7 +167,7 @@ always @ (posedge clk)
       haddr_r <= wr_addr;
 
     end
-/*
+
 // Handle refresh counter
 always @ (posedge clk)
  if (~rst_n)
@@ -202,13 +180,12 @@ always @ (posedge clk)
 
 
 /* Handle logic for sending addresses to SDRAM based on current state*/
-/*
 always @*
 begin
     if (state[4])
-      data_mask_r = 1'b0;
+      data_mask_r <= 1'b0;
     else
-      data_mask_r = 1'b1;
+      data_mask_r <= 1'b1;
 
    bank_addr_r = 2'b00;
    addr_r = {SDRADDR_WIDTH{1'b0}};
@@ -236,7 +213,7 @@ begin
      //   column address
      addr_r = {
                {SDRADDR_WIDTH-(11){1'b0}},
-               1'b1,                       //A10
+               1'b1,                       /* A10 */
                {10-COL_WIDTH{1'b0}},
                haddr_r[COL_WIDTH-1:0]
               };
@@ -250,8 +227,8 @@ begin
      //                                       T  654L210
      addr_r = {{SDRADDR_WIDTH-10{1'b0}}, 10'b1000110000};
      end
-end*/
-/*
+end
+
 // Next state logic
 always @*
 begin
@@ -393,19 +370,5 @@ begin
         command_nxt = command;
         end
 end
-*/
-
-reg [7:0] data_rd;
-
-//Tri-State buffer controll
-SB_IO # (
-    .PIN_TYPE(6'b1010_01),
-    .PULLUP(1'b0)
-) io1 [7:0] (
-    .PACKAGE_PIN(data),
-    .OUTPUT_ENABLE(state == WRIT_CAS),
-    .D_OUT_0(8'b11110000),
-    .D_IN_0(data_rd),
-);
 
 endmodule
