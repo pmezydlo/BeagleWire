@@ -115,7 +115,14 @@ gpmc_controller (
     .data_in(data_in),
 );
 
-assign pmod1 = 8'b00000000;
+assign pmod1[0] = sdram_ras;
+assign pmod1[1] = sdram_cas;
+assign pmod1[2] = sdram_we;
+assign pmod1[3] = sdram_clk;
+assign pmod1[4] = sdram_dqm;
+
+assign led = mem[0][3:0];
+assign pmod1[7:5] = 3'b000;
 assign pmod2 = 8'b00000000;
 assign pmod3 = 8'b00000000;
 assign pmod4 = 8'b00000000;

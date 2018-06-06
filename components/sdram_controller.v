@@ -299,7 +299,10 @@ begin
             next = INIT_NOP4;
             state_cnt_nxt = 4'd1;
             end
-          // INIT_NOP4: default - IDLE
+          INIT_NOP4:
+            begin
+            next = IDLE;
+            end
 
           // REFRESH
           REF_PRE:
@@ -316,7 +319,11 @@ begin
             next = REF_NOP2;
             state_cnt_nxt = 4'd7;
             end
-          // REF_NOP2: default - IDLE
+          REF_NOP2:
+            begin
+            next = IDLE;
+            end
+
 
           // WRITE
           WRIT_ACT:
@@ -334,7 +341,10 @@ begin
             next = WRIT_NOP2;
             state_cnt_nxt = 4'd1;
             end
-          // WRIT_NOP2: default - IDLE
+           WRIT_NOP2: //default - IDLE
+            begin
+            next = IDLE;
+            end
 
           // READ
           READ_ACT:
@@ -356,7 +366,10 @@ begin
             begin
             next = READ_READ;
             end
-          // READ_READ: default - IDLE
+          READ_READ:
+            begin
+            next = IDLE;
+            end
 
           default:
             begin

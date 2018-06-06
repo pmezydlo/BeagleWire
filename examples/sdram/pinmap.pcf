@@ -75,14 +75,14 @@ set_io sdram_addr[10] 119
 set_io sdram_addr[11] 85
 set_io sdram_addr[12] 87
 
-#set_io sdram_data[0] 96
-#set_io sdram_data[1] 97
-#set_io sdram_data[2] 98
-#set_io sdram_data[3] 99
-#set_io sdram_data[4] 95
-#set_io sdram_data[5] 80
-#set_io sdram_data[6] 79
-#set_io sdram_data[7] 78
+set_io sdram_data[0] 96
+set_io sdram_data[1] 97
+set_io sdram_data[2] 98
+set_io sdram_data[3] 99
+set_io sdram_data[4] 95
+set_io sdram_data[5] 80
+set_io sdram_data[6] 79
+set_io sdram_data[7] 78
 
 set_io sdram_bank[0] 121
 set_io sdram_bank[1] 120
