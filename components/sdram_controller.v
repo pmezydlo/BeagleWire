@@ -99,6 +99,8 @@ reg [9:0] refresh_cnt;
 reg [7:0] command;
 reg [4:0] state;
 
+reg wr_enable_prev;
+reg rd_enable_prev;
 
 reg [7:0] command_nxt;
 reg [3:0] state_cnt_nxt;
@@ -136,9 +138,14 @@ always @ (posedge clk)
     wr_data_r <= 8'b0;
     rd_data_r <= 8'b0;
     busy <= 1'b0;
+    wr_enable_prev <= 1'b0;
+    rd_enable_prev <= 1'b0;
     end
   else
     begin
+
+    wr_enable_prev <= wr_enable;
+    rd_enable_prev <= rd_enable;
 
     state <= next;
     command <= command_nxt;
@@ -241,12 +248,12 @@ begin
           next = REF_PRE;
           command_nxt = CMD_PALL;
           end
-        else if (rd_enable)
+        else if (rd_enable && !rd_enable_prev)
           begin
           next = READ_ACT;
           command_nxt = CMD_BACT;
           end
-        else if (wr_enable)
+        else if (wr_enable && !wr_enable_prev)
           begin
           next = WRIT_ACT;
           command_nxt = CMD_BACT;
