@@ -1,0 +1,31 @@
+.PHONY: all load clean
+
+DEVICE = 8k
+FOOTPRNT = tq144:4k
+PIN_SRC ?= pinmap.pcf
+
+$(PROJ).blif: $(SRC)
+
+%.blif:
+	time yosys \
+		-q \
+		-p "synth_ice40 -top top -blif $@" \
+		$^
+
+%.asc: $(PIN_SRC) %.blif
+	time arachne-pnr \
+		-d $(DEVICE) \
+		-P $(FOOTPRNT) \
+		-o $@ \
+		-p \
+		$^
+
+%.bin: %.asc
+	time icepack $^ $@
+	echo -e "\x0\x0\x0\x0\x0\x0\x0" >> $@
+
+%.load: %.bin
+	dd if=$< of=/dev/spidev1.0
+
+clean:
+	$(RM) *.blif *.asc *.bin
