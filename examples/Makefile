@@ -10,7 +10,7 @@ SUBDIRS += sdram
 SUBDIRS += spi
 SUBDIRS += stepper_motor
 SUBDIRS += uart
-#SUBDIRS += arm_blink_leds
+SUBDIRS += arm_blink_leds
 
 all: $(foreach d,$(SUBDIRS),$d/$d.bin)
 

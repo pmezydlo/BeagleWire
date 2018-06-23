@@ -17,8 +17,8 @@ before_script:
   - export DST_PROJECT=$PWD
   - echo $DST_PROJECT
 
-  - export SOURCE_BRANCH="4.12"
-  - export SOURCE_VERSION="rc7"
+  - export SOURCE_BRANCH="4.14"
+  - export SOURCE_VERSION="rc1"
   - export SOURCE_PLATFORM="bone1"
 
   - wget -c https://releases.linaro.org/components/toolchain/binaries/5.3-2016.02/arm-linux-gnueabihf/gcc-linaro-5.3-2016.02-x86_64_arm-linux-gnueabihf.tar.xz
@@ -48,19 +48,14 @@ script:
   - make -C $DST_PROJECT/drivers/ ARCH=arm CROSS_COMPILE=${CC}
   - sudo perl $DST_PROJECT/linux-stable-rcn-ee-$SOURCE_BRANCH-$SOURCE_VERSION/scripts/checkpatch.pl --no-tree -f drivers/*.c
 
-  - make -C $DST_PROJECT/examples/arm_blink_leds/
-  - make -C $DST_PROJECT/examples/blink_leds/ 
-  - make -C $DST_PROJECT/examples/spi/
-  - make -C $DST_PROJECT/examples/gpio/
-  - make -C $DST_PROJECT/examples/pwm/
-  - make -C $DST_PROJECT/examples/uart/
-  - make -C $DST_PROJECT/examples/i2c/
+  - make all -C $DST_PROJECT/examples
 
   - make -C $DST_PROJECT/bridge_lib/ ARCH=arm CROSS_COMPILE=${CC}
 
   - cd $DST_PROJECT/DTS
   - sudo dtc -O dtb -o BW-ICE40Cape-00A0.dtbo -b 0 -@ BW-ICE40Cape-00A0.dts
-  - sudo dtc -O dtb -o BW-SPI-ICE40Cape-00A0.dtbo -b 0 -@ BW-ICE40Cape-00A0.dts
-  - sudo dtc -O dtb -o BW-GPIO-ICE40Cape-00A0.dtbo -b 0 -@ BW-ICE40Cape-00A0.dts
-  - sudo dtc -O dtb -o BW-PWM-ICE40Cape-00A0.dtbo -b 0 -@ BW-ICE40Cape-00A0.dts
+  - sudo dtc -O dtb -o BW-SPI-ICE40Cape-00A0.dtbo -b 0 -@ BW-SPI-ICE40Cape-00A0.dts
+  - sudo dtc -O dtb -o BW-GPIO-ICE40Cape-00A0.dtbo -b 0 -@ BW-GPIO-ICE40Cape-00A0.dts
+  - sudo dtc -O dtb -o BW-PWM-ICE40Cape-00A0.dtbo -b 0 -@ BW-PWM-ICE40Cape-00A0.dts
+  - sudo dtc -O dtb -o BW-I2C-ICE40Cape-00A0.dtbo -b 0 -@ BW-I2C-ICE40Cape-00A0.dts
 
