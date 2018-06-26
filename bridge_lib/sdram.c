@@ -26,6 +26,59 @@ typedef struct __attribute__((__packed__))
 	volatile uint16_t rd_data; //  8 bits, offset 4
 } bw_sdram_t;
 
+
+void
+sdram_write(
+	bw_sdram_t * const sdram,
+	uint32_t addr,
+	uint8_t value
+) {
+	//set sdram address
+	sdram->addr_hi = (addr >> 16) & 0x01FF;
+	sdram->addr_lo = (addr >>  0) & 0xFFFF;
+
+	//set sdram data
+	sdram->wr_data = value;
+
+	//set wr enable flag
+	sdram->wr_enable = 1;
+
+	//waiting for clr busy bit
+	while (sdram->busy)
+		;
+
+	// clr we enable bit
+	sdram->wr_enable = 0;
+}
+
+uint8_t
+sdram_read(
+	bw_sdram_t * const sdram,
+	uint32_t addr
+)
+{
+	//set sdra, address
+	sdram->addr_hi = (addr >> 16) & 0x01FF;
+	sdram->addr_lo = (addr >>  0) & 0xFFFF;
+
+	//set rd enable flag
+	sdram->rd_enable = 1;
+
+	// waiting for clr busy bit
+	while (sdram->busy)
+		;
+
+	// waiting for clr rd ready bit
+	while (sdram->rd_busy)
+		;
+
+	// clr rd enable bit
+	sdram->rd_enable = 0;
+
+	return sdram->rd_data;
+}
+
+
 int main(int argc, char **argv)
 {
 	uint16_t xor = argc > 1 ? strtol(argv[1], NULL, 0) : 0;
@@ -48,51 +101,24 @@ int main(int argc, char **argv)
 
 	printf("writing....\n");
 	for (size_t i=0;i<100;i++) {
-		//set sdram address
-		sdram->addr_hi = 0x12;
-		sdram->addr_lo = 0x51 + i;
-
-		//set sdram data
-		sdram->wr_data = i ^ xor;
-
-		//set wr enable flag
-		sdram->wr_enable = 1;
-
-		//waiting for clr busy bit
-		while (sdram->busy)
-			;
-
-		// clr we enable bit
-		sdram->wr_enable = 0;
+		sdram_write(sdram, 0x120051 + i, i ^ xor);
 	}
 
 	printf("reading....\n");
 	for (size_t i=0;i<100;i++) {
-		//set sdra, address
-		sdram->addr_hi = 0x12;
-		sdram->addr_lo = 0x51 + i;
+		for(int j = 0 ; j < 4 ; j++)
+		{
+			uint8_t data = sdram_read(sdram, 0x120051 + i);
+			if (data == (i ^ xor))
+				break;
 
-		//set rd enable flag
-		sdram->rd_enable = 1;
-
-		// waiting for clr busy bit
-                while (sdram->busy)
-			;
-
-		// waiting for clr rd ready bit
-		while (sdram->rd_busy)
-			;
-
-		// clr rd enable bit
-		sdram->rd_enable = 0;
-
-		const uint16_t data = sdram->rd_data;
-
-		printf("data[%x]=%x%s\n",
-			i,
-			data,
-			data == (i ^ xor) ? "" : " BAD"
-		);
+			printf("try %d data[%x]=%x%s\n",
+				j,
+				i,
+				data,
+				data == (i ^ xor) ? "" : " BAD"
+			);
+		}
  	}
 
 	bridge_close(&br);
