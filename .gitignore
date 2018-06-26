@@ -1,0 +1,6 @@
+*.bin
+*.blif
+*.asc
+.*.d
+*.o
+.*.sw[po]
