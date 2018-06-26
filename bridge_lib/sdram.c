@@ -10,50 +10,7 @@
 #include <time.h>
 #include <errno.h>
 
-#define BW_BRIDGE_MEM_ADR 0x01000000
-#define BW_BRIDGE_MEM_SIZE 0x20000
-
-struct bridge {
-	void		*virt_addr;
-	int		mem_dev;
-	uint32_t	alloc_mem_size;
-	void		*mem_pointer;
-};
-
-int bridge_init(struct bridge *br, uint32_t mem_address, uint32_t mem_size) {
-	uint32_t page_mask;
-	uint32_t page_size;
-
-	page_size = sysconf(_SC_PAGESIZE);
-	br->alloc_mem_size = (((mem_size / page_size) + 1) * page_size);
-	page_mask = (page_size - 1);
-
-	br->mem_dev = open("/dev/mem", O_RDWR | O_SYNC);
-	if (br->mem_dev < 0)
-		return -EPERM;
-
-	br->mem_pointer = mmap(NULL,
-		               br->alloc_mem_size,
-			       PROT_READ | PROT_WRITE,
-                               MAP_SHARED,
-                               br->mem_dev,
-                               (mem_address & ~page_mask));
-
-	if(br->mem_pointer == MAP_FAILED) {
-	      return -ENOMEM;
-	}
-
-	br->virt_addr = (br->mem_pointer + (mem_address & page_mask));
-
-	return 0;
-}
-
-void bridge_close(struct bridge *br) {
-	if (munmap(br->mem_pointer, br->alloc_mem_size) == -1)
-		perror("Error un-mmapping the file");
-
-	close(br->mem_dev);
-}
+#include "bw_bridge.h"
 
 int main()
 {

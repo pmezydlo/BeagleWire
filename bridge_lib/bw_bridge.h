@@ -9,6 +9,9 @@
 #include <time.h>
 #include <errno.h>
 
+#define BW_BRIDGE_MEM_ADR 0x01000000
+#define BW_BRIDGE_MEM_SIZE 0x20000
+
 struct bridge {
 	void		*virt_addr;
 	int		mem_dev;
