@@ -1,17 +1,32 @@
 ARCH = arm
-CROSS_CC = arm-linux-gnueabihf-
-CC = $(CROSS_CC)gcc
-PWD = $(shell pwd)
-CFLAGS = -Wall -g
+CROSS ?= arm-linux-gnueabihf-
+CC = $(CROSS)gcc
+PWD := $(shell pwd)
 
-SRCS = main.c bw_bridge.c
-OBJS = $(SRCS: .c=.o)
-MAIN = main
+CFLAGS = \
+        -std=c99 \
+	-g \
+	-O3 \
+        -W \
+        -Wall \
+        -Wextra \
+	-Wp,-MMD,$(dir $@).$(notdir $@).d \
+        -Wp,-MT,$@ \
 
-all: $(MAIN)
+bins-y += sdram
+bins-y += i2c
+bins-y += main
 
-$(MAIN): $(OBJS)
-	$(CC) $(CFLAGS) -o $(MAIN) $(OBJS)
+all: $(bins-y)
+
+$(bins-y):
+	$(CC) -o $@ $^
+
+sdram: sdram.o bw_bridge.o
+i2c: i2c_br.o bw_bridge.o
+main: main.o bw_bridge.o
 
 clean:
-	$(RM) *.o *~ $(MAIN)
+	$(RM) *.o *~ $(bins-y)
+
+-include .*.d

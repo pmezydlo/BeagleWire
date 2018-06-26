@@ -1,13 +1,9 @@
 #include <stdio.h>
 #include "bw_bridge.h"
 
-#define BW_BRIDGE_MEM_ADR 0x01000000
-#define BW_BRIDGE_MEM_SIZE 0x20000
-
 int main()
 {
 	struct bridge br;
-	int i;
 	void *ptr;
 	char text[] = {0x0, 0x0};
 	char rd_text[11];
@@ -24,7 +20,7 @@ int main()
 	*(uint16_t *)(ptr) |= (1<<5);
 	*(uint16_t *)(ptr) |= 2;
 
-	for (i=0;i<sizeof(text);i++) {
+	for (size_t i=0;i<sizeof(text);i++) {
 
 		*(uint16_t *)(ptr + 2) = text[i];
 
@@ -61,7 +57,7 @@ int main()
 	rd_text[i] = (*(uint16_t *)(ptr) >> 8);
 	}
 
-	for (i=0;i<sizeof(rd_text);i++)
+	for (size_t i=0;i<sizeof(rd_text);i++)
 		printf("%c", rd_text[i]);
 
 
