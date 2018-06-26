@@ -1,3 +1,9 @@
 *.bin
 *.blif
 *.asc
+.*.d
+*.o
+.*.sw[po]
+.*.cmd
+*.mod.c
+*.ko
