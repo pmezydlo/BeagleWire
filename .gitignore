@@ -4,3 +4,6 @@
 .*.d
 *.o
 .*.sw[po]
+.*.cmd
+*.mod.c
+*.ko
