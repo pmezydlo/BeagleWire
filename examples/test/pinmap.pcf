@@ -15,3 +15,10 @@ set_io led[2] 31
 set_io led[3] 32
 
 set_io pmod1[0] 38
+set_io pmod1[1] 37
+set_io pmod1[2] 41
+set_io pmod1[3] 39
+set_io pmod1[4] 43
+set_io pmod1[5] 42
+set_io pmod1[6] 45
+set_io pmod1[7] 44
