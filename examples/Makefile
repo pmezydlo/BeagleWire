@@ -1,7 +1,6 @@
 SUBDIRS += test
 SUBDIRS += blink_leds
 SUBDIRS += gpio
-SUBDIRS += hd44780
 SUBDIRS += i2c
 SUBDIRS += lcd
 SUBDIRS += lcd_game
