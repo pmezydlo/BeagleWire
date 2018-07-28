@@ -20,7 +20,7 @@
 		__overlay__ {
 			gpio-ice40 {
                                 compatible = "linux,gpio-mmio";
-				reg = <0x1000000 0x8>, <0x1000008 0x8>, <x01000010 0x8>;
+				reg = <0x1000000 0x8>, <0x1000008 0x8>, <0x01000010 0x8>;
 				reg-names = "dirout", "dat", "set"; 
 				#gpio-cells = <2>;
 				gpio-controller;

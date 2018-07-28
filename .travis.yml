@@ -48,9 +48,8 @@ script:
   - make -C $DST_PROJECT/drivers/ ARCH=arm CROSS_COMPILE=${CC}
   - sudo perl $DST_PROJECT/linux-stable-rcn-ee-$SOURCE_BRANCH-$SOURCE_VERSION/scripts/checkpatch.pl --no-tree -f drivers/*.c
 
-  - make all -C $DST_PROJECT/examples
-
-  - make -C $DST_PROJECT/bridge_lib/ ARCH=arm CROSS_COMPILE=${CC}
+  - make -C $DST_PROJECT/examples
+  - make -C $DST_PROJECT/bridge_lib/
 
   - cd $DST_PROJECT/DTS
   - sudo dtc -O dtb -o BW-ICE40Cape-00A0.dtbo -b 0 -@ BW-ICE40Cape-00A0.dts
