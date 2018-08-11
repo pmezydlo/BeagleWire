@@ -14,11 +14,12 @@ set_io led[1] 29
 set_io led[2] 31
 set_io led[3] 32
 
-set_io pmod1[0] 38
-set_io pmod1[1] 37
-set_io pmod1[2] 41
-set_io pmod1[3] 39
-set_io pmod1[4] 43
-set_io pmod1[5] 42
-set_io pmod1[6] 45
-set_io pmod1[7] 44
+# pmod
+set_io pmod1[0] 37 # PMOD1 B1
+set_io pmod1[1] 39 # PMOD1 B2
+set_io pmod1[2] 42 # PMOD1 B3
+set_io pmod1[3] 44 # PMOD1 B4
+set_io pmod1[4] 38 # PMOD1 A1
+set_io pmod1[5] 41 # PMOD1 A2
+set_io pmod1[6] 43 # PMOD1 A3
+set_io pmod1[7] 45 # PMOD1 A4

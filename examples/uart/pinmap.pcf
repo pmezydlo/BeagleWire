@@ -42,21 +42,21 @@ set_io gpmc_oen 20
 set_io btn[0] 25
 set_io btn[1] 26
 
-# PMOD
-set_io pmod1[0] 38
-set_io pmod1[1] 37
-set_io pmod1[2] 41
-set_io pmod1[3] 39
-set_io pmod1[4] 43
-set_io pmod1[5] 42
-set_io pmod1[6] 45
-set_io pmod1[7] 44
+# pmod
+set_io pmod1[0] 37 # PMOD1 B1
+set_io pmod1[1] 39 # PMOD1 B2
+set_io pmod1[2] 42 # PMOD1 B3
+set_io pmod1[3] 44 # PMOD1 B4
+set_io pmod1[4] 38 # PMOD1 A1
+set_io pmod1[5] 41 # PMOD1 A2
+set_io pmod1[6] 43 # PMOD1 A3
+set_io pmod1[7] 45 # PMOD1 A4
 
-set_io pmod2[0] 48
-set_io pmod2[1] 47
-set_io pmod2[2] 52
-set_io pmod2[3] 49
-set_io pmod2[4] 56
-set_io pmod2[5] 55
-set_io pmod2[6] 62
-set_io pmod2[7] 60
+set_io pmod2[0] 47 # PMOD2 B1
+set_io pmod2[1] 49 # PMOD2 B2
+set_io pmod2[2] 55 # PMOD2 B3
+set_io pmod2[3] 60 # PMOD2 B4
+set_io pmod2[4] 48 # PMOD2 A1
+set_io pmod2[5] 52 # PMOD2 A2
+set_io pmod2[6] 56 # PMOD2 A3
+set_io pmod2[7] 62 # PMOD2 A4
