@@ -1,3 +1,4 @@
+# -*- makefile -*-
 .PHONY: all load clean
 
 DEVICE = 8k
@@ -22,10 +23,13 @@ $(PROJ).blif: $(SRC)
 
 %.bin: %.asc
 	time icepack $^ $@
-	echo -e "\x0\x0\x0\x0\x0\x0\x0" >> $@
+	/bin/echo -n -e '\x0\x0\x0\x0\x0\x0\x0\x0' >> $@
 
 %.load: %.bin
 	dd if=$< of=/dev/spidev1.0
+
+%.bw-prog: %.bin
+	sh /home/debian/load-fw/bw-prog.sh ./$^
 
 clean:
 	$(RM) *.blif *.asc *.bin
