@@ -29,7 +29,7 @@ $(PROJ).blif: $(SRC)
 	dd if=$< of=/dev/spidev1.0
 
 %.bw-prog: %.bin
-	sh /home/debian/load-fw/bw-prog.sh ./$^
+	sh ../../load_fw/bw-prog.sh $^
 
 clean:
 	$(RM) *.blif *.asc *.bin
